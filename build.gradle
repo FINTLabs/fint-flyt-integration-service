@@ -45,6 +45,9 @@ dependencies {
     implementation 'no.fintlabs:fint-kafka:2.3.0'
     implementation 'no.fintlabs:fint-flyt-resource-server:0.0.1'
 
+    implementation 'javax.validation:validation-api'
+    implementation 'org.hibernate.validator:hibernate-validator'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'

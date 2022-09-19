@@ -1,5 +1,6 @@
 package no.fintlabs;
 
+import no.fintlabs.integration.model.Integration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
