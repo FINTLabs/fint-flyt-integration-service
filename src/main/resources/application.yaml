@@ -1,6 +1,12 @@
+fint:
+  application-id: fint-flyt-integration-service
+server:
+  error:
+    include-message: always
 spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+  profiles:
+    include:
+      - flyt-kafka
+      - flyt-logging
+      - flyt-postgres
+      - flyt-resource-server
