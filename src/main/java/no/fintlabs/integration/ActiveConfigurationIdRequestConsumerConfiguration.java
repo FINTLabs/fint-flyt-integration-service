@@ -1,6 +1,5 @@
 package no.fintlabs.integration;
 
-import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.integration.model.Integration;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.CommonLoggingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
-@Slf4j
 @Configuration
 public class ActiveConfigurationIdRequestConsumerConfiguration {
 
