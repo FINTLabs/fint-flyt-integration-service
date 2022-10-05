@@ -24,8 +24,8 @@ public class Integration {
     @Setter(AccessLevel.NONE)
     private long id;
 
-    @NotBlank
-    private String sourceApplicationId;
+    @NotNull
+    private Long sourceApplicationId;
 
     @NotBlank
     private String sourceApplicationIntegrationId;

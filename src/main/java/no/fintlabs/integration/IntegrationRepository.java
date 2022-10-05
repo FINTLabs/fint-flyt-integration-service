@@ -8,12 +8,12 @@ import java.util.Optional;
 public interface IntegrationRepository extends JpaRepository<Integration, Long> {
 
     boolean existsIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
-            String sourceApplicationId,
+            Long sourceApplicationId,
             String sourceApplicationIntegrationId
     );
 
     Optional<Integration> findIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
-            String sourceApplicationId,
+            Long sourceApplicationId,
             String sourceApplicationIntegrationId
     );
 

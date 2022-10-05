@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SourceApplicationIdAndSourceApplicationIntegrationIdWrapper {
-    private String sourceApplicationId;
+    private Long sourceApplicationId;
     private String sourceApplicationIntegrationId;
 }
