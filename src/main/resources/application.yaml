@@ -4,6 +4,9 @@ server:
   error:
     include-message: always
 spring:
+  jpa:
+    properties:
+      javax.persistence.validation.mode: none
   profiles:
     include:
       - flyt-kafka
