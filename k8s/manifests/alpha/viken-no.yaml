@@ -41,7 +41,7 @@ spec:
         - name: fint-flyt-integration-service
           port: 8080
       middlewares:
-        - name: flais-auth-forward
+        - name: fint-flyt-auth-forward
 ---
 apiVersion: apps/v1
 kind: Deployment
