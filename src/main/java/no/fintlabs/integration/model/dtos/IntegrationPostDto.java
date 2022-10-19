@@ -1,27 +1,27 @@
 package no.fintlabs.integration.model.dtos;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import no.fintlabs.integration.model.entities.Integration;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntegrationDto {
+public class IntegrationPostDto {
 
-    private long id;
-
+    @NotNull
     private Long sourceApplicationId;
 
+    @NotBlank
     private String sourceApplicationIntegrationId;
 
+    @NotBlank
     private String destination;
-
-    private Integration.State state;
-
-    private Long activeConfigurationId;
 
 }

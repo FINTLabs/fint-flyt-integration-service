@@ -1,8 +1,9 @@
 package no.fintlabs.integration;
 
-import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
+import no.fintlabs.integration.model.dtos.IntegrationPostDto;
+import no.fintlabs.integration.model.entities.Integration;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -29,6 +30,10 @@ public class IntegrationService {
         );
     }
 
+    public boolean existsById(Long integrationId) {
+        return integrationRepository.existsById(integrationId);
+    }
+
     public Optional<IntegrationDto> findById(Long integrationId) {
         return integrationRepository.findById(integrationId)
                 .map(integrationMappingService::toDto);
@@ -42,10 +47,10 @@ public class IntegrationService {
         );
     }
 
-    public IntegrationDto save(IntegrationDto integrationDto) {
+    public IntegrationDto save(IntegrationPostDto integrationPostDto) {
         return integrationMappingService.toDto(
                 integrationRepository.save(
-                        integrationMappingService.toIntegration(integrationDto)
+                        integrationMappingService.toIntegration(integrationPostDto)
                 )
         );
     }

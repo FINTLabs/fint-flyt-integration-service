@@ -1,6 +1,7 @@
 package no.fintlabs.integration;
 
 import no.fintlabs.integration.model.dtos.IntegrationDto;
+import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.model.entities.Integration;
 import org.springframework.stereotype.Service;
 
@@ -9,14 +10,13 @@ import java.util.Collection;
 @Service
 public class IntegrationMappingService {
 
-    public Integration toIntegration(IntegrationDto integrationDto) {
+    public Integration toIntegration(IntegrationPostDto integrationPostDto) {
         return Integration
                 .builder()
-                .sourceApplicationId(integrationDto.getSourceApplicationId())
-                .sourceApplicationIntegrationId(integrationDto.getSourceApplicationIntegrationId())
-                .destination(integrationDto.getDestination())
-                .state(integrationDto.getState())
-                .activeConfigurationId(integrationDto.getActiveConfigurationId())
+                .sourceApplicationId(integrationPostDto.getSourceApplicationId())
+                .sourceApplicationIntegrationId(integrationPostDto.getSourceApplicationIntegrationId())
+                .destination(integrationPostDto.getDestination())
+                .state(Integration.State.DEACTIVATED)
                 .build();
     }
 
@@ -35,4 +35,5 @@ public class IntegrationMappingService {
                 .activeConfigurationId(integration.getActiveConfigurationId())
                 .build();
     }
+
 }
