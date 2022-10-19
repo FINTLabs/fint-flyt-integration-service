@@ -1,7 +1,8 @@
-package no.fintlabs.integration;
+package no.fintlabs.integration.kafka;
 
-import no.fintlabs.integration.model.Integration;
-import no.fintlabs.integration.model.SourceApplicationIdAndSourceApplicationIntegrationIdWrapper;
+import no.fintlabs.integration.IntegrationRepository;
+import no.fintlabs.integration.model.entities.Integration;
+import no.fintlabs.integration.model.dtos.SourceApplicationIdAndSourceApplicationIntegrationIdDto;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;
@@ -17,7 +18,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 public class IntegrationIdRequestConsumerConfiguration {
 
     @Bean
-    public ConcurrentMessageListenerContainer<String, SourceApplicationIdAndSourceApplicationIntegrationIdWrapper> integrationIdRequestConsumer(
+    public ConcurrentMessageListenerContainer<String, SourceApplicationIdAndSourceApplicationIntegrationIdDto> integrationIdRequestConsumer(
             RequestConsumerFactoryService requestConsumerFactoryService,
             RequestTopicService requestTopicService,
             IntegrationRepository integrationRepository
@@ -31,9 +32,9 @@ public class IntegrationIdRequestConsumerConfiguration {
                 .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
         return requestConsumerFactoryService.createFactory(
-                SourceApplicationIdAndSourceApplicationIntegrationIdWrapper.class,
+                SourceApplicationIdAndSourceApplicationIntegrationIdDto.class,
                 String.class,
-                (ConsumerRecord<String, SourceApplicationIdAndSourceApplicationIntegrationIdWrapper> consumerRecord) -> {
+                (ConsumerRecord<String, SourceApplicationIdAndSourceApplicationIntegrationIdDto> consumerRecord) -> {
 
                     String integrationId = integrationRepository
                             .findIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(

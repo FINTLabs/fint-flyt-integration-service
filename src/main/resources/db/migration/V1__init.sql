@@ -1,7 +1,7 @@
 create table integration
 (
     id                                bigserial not null,
-    active_configuration_id           varchar(255),
+    active_configuration_id           int8,
     destination                       varchar(255),
     source_application_id             int8,
     source_application_integration_id varchar(255),

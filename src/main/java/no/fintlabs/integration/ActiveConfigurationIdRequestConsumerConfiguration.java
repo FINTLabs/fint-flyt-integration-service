@@ -1,6 +1,6 @@
 package no.fintlabs.integration;
 
-import no.fintlabs.integration.model.Integration;
+import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;
@@ -16,7 +16,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 public class ActiveConfigurationIdRequestConsumerConfiguration {
 
     @Bean
-    public ConcurrentMessageListenerContainer<String, String> activeConfigurationIdRequestConsumer(
+    public ConcurrentMessageListenerContainer<String, Long> activeConfigurationIdRequestConsumer(
             RequestConsumerFactoryService requestConsumerFactoryService,
             RequestTopicService requestTopicService,
             IntegrationRepository integrationRepository
@@ -30,18 +30,18 @@ public class ActiveConfigurationIdRequestConsumerConfiguration {
                 .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
         return requestConsumerFactoryService.createFactory(
-                String.class,
-                String.class,
-                (ConsumerRecord<String, String> consumerRecord) -> {
-                    String integrationId = consumerRecord.value();
+                Long.class,
+                Long.class,
+                (ConsumerRecord<String, Long> consumerRecord) -> {
+                    Long integrationId = consumerRecord.value();
 
-                    String activeConfigurationId = integrationRepository
-                            .findById(Long.parseLong(integrationId))
+                    Long activeConfigurationId = integrationRepository
+                            .findById(integrationId)
                             .map(Integration::getActiveConfigurationId)
                             .orElse(null);
 
                     return ReplyProducerRecord
-                            .<String>builder()
+                            .<Long>builder()
                             .value(activeConfigurationId)
                             .build();
                 },

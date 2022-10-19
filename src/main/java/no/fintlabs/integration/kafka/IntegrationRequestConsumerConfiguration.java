@@ -1,6 +1,7 @@
-package no.fintlabs.integration;
+package no.fintlabs.integration.kafka;
 
-import no.fintlabs.integration.model.Integration;
+import no.fintlabs.integration.IntegrationRepository;
+import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;

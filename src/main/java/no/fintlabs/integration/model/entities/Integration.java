@@ -1,14 +1,15 @@
-package no.fintlabs.integration.model;
+package no.fintlabs.integration.model.entities;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(
@@ -17,6 +18,11 @@ import javax.validation.constraints.NotNull;
         )
 })
 public class Integration {
+
+    public enum State {
+        ACTIVE,
+        DEACTIVATED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +40,8 @@ public class Integration {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private IntegrationState state;
+    private State state;
 
-    private String activeConfigurationId;
+    private Long activeConfigurationId;
 
 }
