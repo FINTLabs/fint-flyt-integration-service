@@ -1,8 +1,8 @@
 package no.fintlabs.integration.kafka;
 
-import no.fintlabs.integration.IntegrationRepository;
+import no.fintlabs.integration.IntegrationService;
+import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.SourceApplicationIdAndSourceApplicationIntegrationIdDto;
-import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;
@@ -22,7 +22,7 @@ public class IntegrationRequestConsumerConfiguration {
     integrationByIntegrationIdRequestConsumer(
             RequestConsumerFactoryService requestConsumerFactoryService,
             RequestTopicService requestTopicService,
-            IntegrationRepository integrationRepository
+            IntegrationService integrationService
     ) {
         RequestTopicNameParameters requestTopicNameParameters = RequestTopicNameParameters
                 .builder()
@@ -34,10 +34,10 @@ public class IntegrationRequestConsumerConfiguration {
 
         return requestConsumerFactoryService.createFactory(
                 Long.class,
-                Integration.class,
+                IntegrationDto.class,
                 (ConsumerRecord<String, Long> consumerRecord) -> ReplyProducerRecord
-                        .<Integration>builder()
-                        .value(integrationRepository
+                        .<IntegrationDto>builder()
+                        .value(integrationService
                                 .findById(consumerRecord.value())
                                 .orElse(null))
                         .build(),
@@ -50,7 +50,7 @@ public class IntegrationRequestConsumerConfiguration {
     integrationBySourceApplicationIdAndSourceApplicationIntegrationIdRequestConsumer(
             RequestConsumerFactoryService requestConsumerFactoryService,
             RequestTopicService requestTopicService,
-            IntegrationRepository integrationRepository
+            IntegrationService integrationService
     ) {
         RequestTopicNameParameters requestTopicNameParameters = RequestTopicNameParameters
                 .builder()
@@ -62,21 +62,19 @@ public class IntegrationRequestConsumerConfiguration {
 
         return requestConsumerFactoryService.createFactory(
                 SourceApplicationIdAndSourceApplicationIntegrationIdDto.class,
-                String.class,
+                IntegrationDto.class,
                 (ConsumerRecord<String, SourceApplicationIdAndSourceApplicationIntegrationIdDto> consumerRecord) -> {
 
-                    String integrationId = integrationRepository
+                    IntegrationDto integrationDto = integrationService
                             .findIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
                                     consumerRecord.value().getSourceApplicationId(),
                                     consumerRecord.value().getSourceApplicationIntegrationId()
                             )
-                            .map(Integration::getId)
-                            .map(String::valueOf)
                             .orElse(null);
 
                     return ReplyProducerRecord
-                            .<String>builder()
-                            .value(integrationId)
+                            .<IntegrationDto>builder()
+                            .value(integrationDto)
                             .build();
                 },
                 new CommonLoggingErrorHandler()

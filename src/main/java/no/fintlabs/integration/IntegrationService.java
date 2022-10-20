@@ -39,12 +39,26 @@ public class IntegrationService {
                 .map(integrationMappingService::toDto);
     }
 
+    public Optional<IntegrationDto> findIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
+            Long sourceApplicationId, String sourceApplicationIntegrationId
+    ) {
+        return integrationRepository.findIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
+                        sourceApplicationId, sourceApplicationIntegrationId
+                )
+                .map(integrationMappingService::toDto);
+    }
+
     public boolean existsIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
             Long sourceApplicationId, String sourceApplicationIntegrationId
     ) {
         return integrationRepository.existsIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
                 sourceApplicationId, sourceApplicationIntegrationId
         );
+    }
+
+    public Optional<Long> findActiveConfigurationIdByIntegrationId(Long integrationId) {
+        return integrationRepository.findById(integrationId)
+                .map(Integration::getActiveConfigurationId);
     }
 
     public IntegrationDto save(IntegrationPostDto integrationPostDto) {

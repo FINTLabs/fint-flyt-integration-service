@@ -1,7 +1,6 @@
 package no.fintlabs.integration.kafka;
 
-import no.fintlabs.integration.IntegrationRepository;
-import no.fintlabs.integration.model.entities.Integration;
+import no.fintlabs.integration.IntegrationService;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;
@@ -20,7 +19,7 @@ public class ActiveConfigurationIdRequestConsumerConfiguration {
     public ConcurrentMessageListenerContainer<String, Long> activeConfigurationIdRequestConsumer(
             RequestConsumerFactoryService requestConsumerFactoryService,
             RequestTopicService requestTopicService,
-            IntegrationRepository integrationRepository
+            IntegrationService integrationService
     ) {
         RequestTopicNameParameters requestTopicNameParameters = RequestTopicNameParameters
                 .builder()
@@ -36,9 +35,8 @@ public class ActiveConfigurationIdRequestConsumerConfiguration {
                 (ConsumerRecord<String, Long> consumerRecord) -> {
                     Long integrationId = consumerRecord.value();
 
-                    Long activeConfigurationId = integrationRepository
-                            .findById(integrationId)
-                            .map(Integration::getActiveConfigurationId)
+                    Long activeConfigurationId = integrationService
+                            .findActiveConfigurationIdByIntegrationId(integrationId)
                             .orElse(null);
 
                     return ReplyProducerRecord
