@@ -1,6 +1,7 @@
 package no.fintlabs.integration.kafka;
 
 import no.fintlabs.integration.IntegrationRepository;
+import no.fintlabs.integration.model.dtos.SourceApplicationIdAndSourceApplicationIntegrationIdDto;
 import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
@@ -17,7 +18,8 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 public class IntegrationRequestConsumerConfiguration {
 
     @Bean
-    public ConcurrentMessageListenerContainer<String, Long> IntegrationRequestConsumerConfiguration(
+    public ConcurrentMessageListenerContainer<String, Long>
+    integrationByIntegrationIdRequestConsumer(
             RequestConsumerFactoryService requestConsumerFactoryService,
             RequestTopicService requestTopicService,
             IntegrationRepository integrationRepository
@@ -39,7 +41,46 @@ public class IntegrationRequestConsumerConfiguration {
                                 .findById(consumerRecord.value())
                                 .orElse(null))
                         .build(),
-        new CommonLoggingErrorHandler()
+                new CommonLoggingErrorHandler()
         ).createContainer(requestTopicNameParameters);
     }
+
+    @Bean
+    public ConcurrentMessageListenerContainer<String, SourceApplicationIdAndSourceApplicationIntegrationIdDto>
+    integrationBySourceApplicationIdAndSourceApplicationIntegrationIdRequestConsumer(
+            RequestConsumerFactoryService requestConsumerFactoryService,
+            RequestTopicService requestTopicService,
+            IntegrationRepository integrationRepository
+    ) {
+        RequestTopicNameParameters requestTopicNameParameters = RequestTopicNameParameters
+                .builder()
+                .resource("integration")
+                .parameterName("source-application-id-and-source-application-integration-id")
+                .build();
+        requestTopicService
+                .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
+
+        return requestConsumerFactoryService.createFactory(
+                SourceApplicationIdAndSourceApplicationIntegrationIdDto.class,
+                String.class,
+                (ConsumerRecord<String, SourceApplicationIdAndSourceApplicationIntegrationIdDto> consumerRecord) -> {
+
+                    String integrationId = integrationRepository
+                            .findIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
+                                    consumerRecord.value().getSourceApplicationId(),
+                                    consumerRecord.value().getSourceApplicationIntegrationId()
+                            )
+                            .map(Integration::getId)
+                            .map(String::valueOf)
+                            .orElse(null);
+
+                    return ReplyProducerRecord
+                            .<String>builder()
+                            .value(integrationId)
+                            .build();
+                },
+                new CommonLoggingErrorHandler()
+        ).createContainer(requestTopicNameParameters);
+    }
+
 }
