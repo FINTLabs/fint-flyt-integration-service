@@ -5,13 +5,15 @@ import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.validation.IntegrationValidatorFacory;
 import no.fintlabs.integration.validation.ValidationErrorsFormattingService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolation;
-import java.util.Collection;
 import java.util.Set;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
@@ -35,8 +37,17 @@ public class IntegrationController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<IntegrationDto>> getIntegrations() {
-        return ResponseEntity.ok(integrationService.findAll());
+    public ResponseEntity<Page<IntegrationDto>> getIntegrations(
+            @RequestParam(name = "side") int page,
+            @RequestParam(name = "antall") int size,
+            @RequestParam(name = "sorteringFelt") String sortProperty,
+            @RequestParam(name = "sorteringRetning") Sort.Direction sortDirection
+    ) {
+        PageRequest pageRequest = PageRequest
+                .of(page, size)
+                .withSort(sortDirection, sortProperty);
+
+        return ResponseEntity.ok(integrationService.findAll(pageRequest));
     }
 
     @GetMapping("{integrationId}")

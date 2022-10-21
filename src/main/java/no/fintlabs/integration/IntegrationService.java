@@ -4,9 +4,10 @@ import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.model.entities.Integration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -24,10 +25,9 @@ public class IntegrationService {
         this.integrationMappingService = integrationMappingService;
     }
 
-    public Collection<IntegrationDto> findAll() {
-        return integrationMappingService.toDtos(
-                integrationRepository.findAll()
-        );
+    public Page<IntegrationDto> findAll(PageRequest pageRequest) {
+        return integrationRepository.findAll(pageRequest)
+                .map(integrationMappingService::toDto);
     }
 
     public boolean existsById(Long integrationId) {
