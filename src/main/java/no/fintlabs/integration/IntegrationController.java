@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolation;
+import java.util.Collection;
 import java.util.Set;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
@@ -36,7 +37,12 @@ public class IntegrationController {
         this.validationErrorsFormattingService = validationErrorsFormattingService;
     }
 
-    @GetMapping
+    @GetMapping()
+    public ResponseEntity<Collection<IntegrationDto>> getIntegrations() {
+        return ResponseEntity.ok(integrationService.findAll());
+    }
+
+    @GetMapping(params = {"side", "antall", "sorteringFelt", "sorteringRetning"})
     public ResponseEntity<Page<IntegrationDto>> getIntegrations(
             @RequestParam(name = "side") int page,
             @RequestParam(name = "antall") int size,
