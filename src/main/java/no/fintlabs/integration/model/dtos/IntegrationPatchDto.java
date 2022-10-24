@@ -4,19 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import no.fintlabs.integration.model.entities.Integration;
-import no.fintlabs.integration.validation.constraints.ActiveConfigurationExists;
-import no.fintlabs.integration.validation.constraints.ActiveConfigurationIsComplete;
-import no.fintlabs.integration.validation.constraints.ActiveConfigurationIsForIntegration;
-import no.fintlabs.integration.validation.groups.ActiveConfigurationIsCompleteGroup;
-import no.fintlabs.integration.validation.groups.ActiveConfigurationIsForIntegrationGroup;
 
-import javax.validation.GroupSequence;
 import java.util.Optional;
 
-@ActiveConfigurationExists
-@ActiveConfigurationIsForIntegration(groups = ActiveConfigurationIsForIntegrationGroup.class)
-@ActiveConfigurationIsComplete(groups = ActiveConfigurationIsCompleteGroup.class)
-@GroupSequence({IntegrationPatchDto.class, ActiveConfigurationIsForIntegrationGroup.class, ActiveConfigurationIsCompleteGroup.class})
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor

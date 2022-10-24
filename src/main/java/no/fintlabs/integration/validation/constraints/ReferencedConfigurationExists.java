@@ -7,10 +7,10 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
-@Constraint(validatedBy = ActiveConfigurationIsForIntegrationValidator.class)
-public @interface ActiveConfigurationIsForIntegration {
+@Constraint(validatedBy = ReferencedConfigurationExistsValidator.class)
+public @interface ReferencedConfigurationExists {
 
-    String message() default "contains active configuration id for configuration that is not for this integration";
+    String message() default "referenced configuration could not be found";
 
     Class<?>[] groups() default {};
 

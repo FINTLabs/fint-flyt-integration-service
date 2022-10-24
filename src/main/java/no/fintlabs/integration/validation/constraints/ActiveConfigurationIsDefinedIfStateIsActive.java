@@ -7,10 +7,10 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
-@Constraint(validatedBy = ActiveConfigurationIsCompleteValidator.class)
-public @interface ActiveConfigurationIsComplete {
+@Constraint(validatedBy = ActiveConfigurationIsDefinedIfStateIsActiveValidator.class)
+public @interface ActiveConfigurationIsDefinedIfStateIsActive {
 
-    String message() default "contains active configuration id for configuration that is not complete";
+    String message() default "is cannot be set to ACTIVE without an active configuration";
 
     Class<?>[] groups() default {};
 

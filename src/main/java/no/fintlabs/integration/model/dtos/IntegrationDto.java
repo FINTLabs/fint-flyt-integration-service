@@ -5,7 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.fintlabs.integration.model.entities.Integration;
+import no.fintlabs.integration.validation.constraints.ActiveConfigurationIsDefinedIfStateIsActive;
+import no.fintlabs.integration.validation.constraints.ReferencedConfigurationExists;
+import no.fintlabs.integration.validation.constraints.ReferencedConfigurationIsComplete;
+import no.fintlabs.integration.validation.constraints.ReferencedConfigurationIsForIntegration;
+import no.fintlabs.integration.validation.groups.ActiveConfigurationIsCompleteGroup;
+import no.fintlabs.integration.validation.groups.ActiveConfigurationIsForIntegrationGroup;
 
+import javax.validation.GroupSequence;
+
+@GroupSequence({IntegrationDto.class, ActiveConfigurationIsForIntegrationGroup.class, ActiveConfigurationIsCompleteGroup.class})
 @Data
 @Builder
 @AllArgsConstructor
@@ -20,8 +29,12 @@ public class IntegrationDto {
 
     private String destination;
 
+    @ActiveConfigurationIsDefinedIfStateIsActive
     private Integration.State state;
 
+    @ReferencedConfigurationExists
+    @ReferencedConfigurationIsForIntegration(groups = ActiveConfigurationIsForIntegrationGroup.class)
+    @ReferencedConfigurationIsComplete(groups = ActiveConfigurationIsCompleteGroup.class)
     private Long activeConfigurationId;
 
 }

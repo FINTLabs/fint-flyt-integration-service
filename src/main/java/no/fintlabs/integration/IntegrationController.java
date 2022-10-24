@@ -57,9 +57,7 @@ public class IntegrationController {
     }
 
     @GetMapping("{integrationId}")
-    public ResponseEntity<IntegrationDto> getIntegration(
-            @PathVariable Long integrationId
-    ) {
+    public ResponseEntity<IntegrationDto> getIntegration(@PathVariable Long integrationId) {
         IntegrationDto integrationDto = integrationService
                 .findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -68,9 +66,7 @@ public class IntegrationController {
     }
 
     @PostMapping
-    public ResponseEntity<IntegrationDto> postIntegration(
-            @RequestBody IntegrationPostDto integrationPostDto
-    ) {
+    public ResponseEntity<IntegrationDto> postIntegration(@RequestBody IntegrationPostDto integrationPostDto) {
         validatePost(integrationPostDto);
         return ResponseEntity.ok(integrationService.save(integrationPostDto));
     }
@@ -99,17 +95,25 @@ public class IntegrationController {
             @PathVariable Long integrationId,
             @RequestBody IntegrationPatchDto integrationPatchDto
     ) {
-        if (!integrationService.existsById(integrationId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        validatePatch(integrationId, integrationPatchDto);
+        IntegrationDto integrationDto = integrationService.findById(integrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        integrationPatchDto.getDestination().ifPresent(integrationDto::setDestination);
+        integrationPatchDto.getState().ifPresent(integrationDto::setState);
+        integrationPatchDto.getActiveConfigurationId().ifPresent(integrationDto::setActiveConfigurationId);
+
+        validatePatchResult(integrationId, integrationDto);
+
         return ResponseEntity.ok(integrationService.updateById(integrationId, integrationPatchDto));
     }
 
-    private void validatePatch(Long integrationId, IntegrationPatchDto integrationPatchDto) {
-        Set<ConstraintViolation<IntegrationPatchDto>> constraintViolations = integrationValidatorFacory
-                .getPatchValidator(integrationId, integrationPatchDto.getActiveConfigurationId().orElse(null))
-                .validate(integrationPatchDto);
+    private void validatePatchResult(Long integrationId, IntegrationDto integrationDto) {
+        Set<ConstraintViolation<IntegrationDto>> constraintViolations = integrationValidatorFacory
+                .getPatchValidator(
+                        integrationId,
+                        integrationDto.getActiveConfigurationId()
+                )
+                .validate(integrationDto);
         if (!constraintViolations.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.UNPROCESSABLE_ENTITY,
