@@ -24,7 +24,7 @@ patches:
   - patch: |-
       - op: replace
         path: "/spec/acls/0/topic"
-        value: "viken-test.flyt.*"
+        value: "viken-test.*"
     target:
       kind: KafkaUserAndAcl
       name: fint-flyt-integration-service
