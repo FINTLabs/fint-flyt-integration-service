@@ -32,6 +32,6 @@ spec:
             - secretRef:
                 name: fint-flyt-integration-service-kafka
             - secretRef:
-                name: flyt-integration-service
+                name: fint-flyt-integration-service
             - configMapRef:
                 name: fint-flyt-integration-service
