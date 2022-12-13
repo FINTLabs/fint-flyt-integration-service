@@ -1,4 +1,4 @@
 apiVersion: "fintlabs.no/v1alpha1"
 kind: PGDatabaseAndUser
 metadata:
-  name: fint-flyt-integration-service
+  name: integration-service
