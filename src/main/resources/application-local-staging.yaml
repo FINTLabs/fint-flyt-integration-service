@@ -18,7 +18,5 @@ spring:
     url: jdbc:postgresql://localhost:5438/fint-flyt-integration-service
     username: postgres
     password: password
-  webflux:
-    base-path: vlfk-no
 server:
   port: 8090
