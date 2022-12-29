@@ -1,5 +1,6 @@
 package no.fintlabs.integration;
 
+import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
@@ -21,6 +22,7 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
 @RestController
 @RequestMapping(INTERNAL_API + "/integrasjoner")
+@Slf4j
 public class IntegrationController {
 
     private final IntegrationService integrationService;
@@ -32,6 +34,8 @@ public class IntegrationController {
             IntegrationValidatorFacory integrationValidatorFacory,
             ValidationErrorsFormattingService validationErrorsFormattingService
     ) {
+        log.info("did the request reach me?");
+
         this.integrationService = integrationService;
         this.integrationValidatorFacory = integrationValidatorFacory;
         this.validationErrorsFormattingService = validationErrorsFormattingService;
@@ -39,6 +43,8 @@ public class IntegrationController {
 
     @GetMapping()
     public ResponseEntity<Collection<IntegrationDto>> getIntegrations() {
+        log.info("get integrations 1");
+
         return ResponseEntity.ok(integrationService.findAll());
     }
 
@@ -49,6 +55,8 @@ public class IntegrationController {
             @RequestParam(name = "sorteringFelt") String sortProperty,
             @RequestParam(name = "sorteringRetning") Sort.Direction sortDirection
     ) {
+        log.info("get integrations 2");
+
         PageRequest pageRequest = PageRequest
                 .of(page, size)
                 .withSort(sortDirection, sortProperty);
@@ -58,6 +66,8 @@ public class IntegrationController {
 
     @GetMapping("{integrationId}")
     public ResponseEntity<IntegrationDto> getIntegration(@PathVariable Long integrationId) {
+        log.info("get integration");
+
         IntegrationDto integrationDto = integrationService
                 .findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -67,6 +77,8 @@ public class IntegrationController {
 
     @PostMapping
     public ResponseEntity<IntegrationDto> postIntegration(@RequestBody IntegrationPostDto integrationPostDto) {
+        log.info("post integration");
+
         validatePost(integrationPostDto);
         return ResponseEntity.ok(integrationService.save(integrationPostDto));
     }
@@ -95,6 +107,8 @@ public class IntegrationController {
             @PathVariable Long integrationId,
             @RequestBody IntegrationPatchDto integrationPatchDto
     ) {
+        log.info("patch integration");
+
         IntegrationDto integrationDto = integrationService.findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
