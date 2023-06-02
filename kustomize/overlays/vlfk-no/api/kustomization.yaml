@@ -19,10 +19,10 @@ patches:
         value: "vlfk.no"
       - op: replace
         path: "/spec/url/basePath"
-        value: "/alpha/vlfk-no"
+        value: "/vlfk-no"
       - op: replace
         path: "/spec/ingress/basePath"
-        value: "/alpha/vlfk-no/api/intern/integrasjoner"
+        value: "/vlfk-no/api/intern/integrasjoner"
       - op: replace
         path: "/spec/env/1/value"
         value: "vlfk.no, vigo.no"
