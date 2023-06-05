@@ -1,9 +1,9 @@
 package no.fintlabs.integration.model.dtos;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.integration.validation.constraints.ActiveConfigurationIsDefinedIfStateIsActive;
 import no.fintlabs.integration.validation.constraints.ReferencedConfigurationExists;
@@ -15,10 +15,10 @@ import no.fintlabs.integration.validation.groups.ActiveConfigurationIsForIntegra
 import javax.validation.GroupSequence;
 
 @GroupSequence({IntegrationDto.class, ActiveConfigurationIsForIntegrationGroup.class, ActiveConfigurationIsCompleteGroup.class})
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@EqualsAndHashCode
+@Jacksonized
+@Builder(toBuilder = true)
 public class IntegrationDto {
 
     private long id;

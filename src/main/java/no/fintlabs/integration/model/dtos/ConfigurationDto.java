@@ -1,8 +1,13 @@
 package no.fintlabs.integration.model.dtos;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
-@Data
+@Getter
+@EqualsAndHashCode
+@Jacksonized
 public class ConfigurationDto {
 
     private Long id;

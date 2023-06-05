@@ -1,10 +1,11 @@
 package no.fintlabs.integration.model.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
-@Data
+@Getter
+@EqualsAndHashCode
+@Jacksonized
 @AllArgsConstructor
 @NoArgsConstructor
 public class SourceApplicationIdAndSourceApplicationIntegrationIdDto {

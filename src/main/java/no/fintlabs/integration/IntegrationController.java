@@ -109,14 +109,15 @@ public class IntegrationController {
     ) {
         log.info("patch integration");
 
-        IntegrationDto integrationDto = integrationService.findById(integrationId)
+        IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = integrationService.findById(integrationId)
+                .map(IntegrationDto::toBuilder)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        integrationPatchDto.getDestination().ifPresent(integrationDto::setDestination);
-        integrationPatchDto.getState().ifPresent(integrationDto::setState);
-        integrationPatchDto.getActiveConfigurationId().ifPresent(integrationDto::setActiveConfigurationId);
+        integrationPatchDto.getDestination().ifPresent(integrationDtoBuilder::destination);
+        integrationPatchDto.getState().ifPresent(integrationDtoBuilder::state);
+        integrationPatchDto.getActiveConfigurationId().ifPresent(integrationDtoBuilder::activeConfigurationId);
 
-        validatePatchResult(integrationId, integrationDto);
+        validatePatchResult(integrationId, integrationDtoBuilder.build());
 
         return ResponseEntity.ok(integrationService.updateById(integrationId, integrationPatchDto));
     }
