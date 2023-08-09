@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
-import no.fintlabs.integration.validation.IntegrationValidatorFacory;
+import no.fintlabs.integration.validation.IntegrationValidatorFactory;
 import no.fintlabs.integration.validation.ValidationErrorsFormattingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,18 +26,18 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 public class IntegrationController {
 
     private final IntegrationService integrationService;
-    private final IntegrationValidatorFacory integrationValidatorFacory;
+    private final IntegrationValidatorFactory integrationValidatorFactory;
     private final ValidationErrorsFormattingService validationErrorsFormattingService;
 
     public IntegrationController(
             IntegrationService integrationService,
-            IntegrationValidatorFacory integrationValidatorFacory,
+            IntegrationValidatorFactory integrationValidatorFactory,
             ValidationErrorsFormattingService validationErrorsFormattingService
     ) {
         log.info("did the request reach me?");
 
         this.integrationService = integrationService;
-        this.integrationValidatorFacory = integrationValidatorFacory;
+        this.integrationValidatorFactory = integrationValidatorFactory;
         this.validationErrorsFormattingService = validationErrorsFormattingService;
     }
 
@@ -84,7 +84,7 @@ public class IntegrationController {
     }
 
     private void validatePost(IntegrationPostDto integrationPostDto) {
-        Set<ConstraintViolation<IntegrationPostDto>> constraintViolations = integrationValidatorFacory
+        Set<ConstraintViolation<IntegrationPostDto>> constraintViolations = integrationValidatorFactory
                 .getValidator()
                 .validate(integrationPostDto);
         if (!constraintViolations.isEmpty()) {
@@ -123,7 +123,7 @@ public class IntegrationController {
     }
 
     private void validatePatchResult(Long integrationId, IntegrationDto integrationDto) {
-        Set<ConstraintViolation<IntegrationDto>> constraintViolations = integrationValidatorFacory
+        Set<ConstraintViolation<IntegrationDto>> constraintViolations = integrationValidatorFactory
                 .getPatchValidator(
                         integrationId,
                         integrationDto.getActiveConfigurationId()
