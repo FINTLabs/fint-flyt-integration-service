@@ -8,13 +8,13 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 @Service
-public class IntegrationValidatorFacory {
+public class IntegrationValidatorFactory {
 
     private final ValidatorFactory validatorFactory;
 
     private final ConfigurationRequestProducerService configurationRequestProducerService;
 
-    public IntegrationValidatorFacory(
+    public IntegrationValidatorFactory(
             ValidatorFactory validatorFactory,
             ConfigurationRequestProducerService configurationRequestProducerService
     ) {

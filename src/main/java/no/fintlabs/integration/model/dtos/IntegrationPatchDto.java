@@ -1,6 +1,7 @@
 package no.fintlabs.integration.model.dtos;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import no.fintlabs.integration.model.entities.Integration;
@@ -10,6 +11,7 @@ import java.util.Optional;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class IntegrationPatchDto {
 
     private String destination;
