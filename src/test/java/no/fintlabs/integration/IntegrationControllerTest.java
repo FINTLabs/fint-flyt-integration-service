@@ -100,6 +100,7 @@ public class IntegrationControllerTest {
         assertThrows(ValidationException.class, () -> controller.postIntegration(postDto));
     }
 
+    // TODO: 18/08/2023 add test for patchIntegration
 //    @Test
 //    void testPatchIntegration() {
 //
