@@ -1,31 +1,31 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: vlfk-no
+namespace: nfk-no
 
 resources:
   - ../../../base
 
 commonLabels:
-  app.kubernetes.io/instance: fint-flyt-integration-service_vlfk_no
-  fintlabs.no/org-id: vlfk.no
+  app.kubernetes.io/instance: fint-flyt-integration-service_nfk_no
+  fintlabs.no/org-id: nfk.no
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/kafka/acls/0/topic"
-        value: "vlfk-no.flyt.*"
+        value: "nfk-no.flyt.*"
       - op: replace
         path: "/spec/orgId"
-        value: "vlfk.no"
+        value: "nfk.no"
       - op: replace
         path: "/spec/url/basePath"
-        value: "/beta/vlfk-no"
+        value: "/beta/nfk-no"
       - op: replace
         path: "/spec/ingress/basePath"
-        value: "/beta/vlfk-no/api/intern/integrasjoner"
+        value: "/beta/nfk-no/api/intern/integrasjoner"
       - op: replace
         path: "/spec/env/1/value"
-        value: "vlfk.no, vigo.no"
+        value: "nfk.no, vigo.no"
 
     target:
       kind: Application
