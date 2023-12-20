@@ -9,7 +9,6 @@ import no.fintlabs.kafka.requestreply.topic.RequestTopicService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.listener.CommonLoggingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
 @Configuration
@@ -29,7 +28,7 @@ public class ActiveConfigurationIdRequestConsumerConfiguration {
         requestTopicService
                 .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
-        return requestConsumerFactoryService.createFactory(
+        return requestConsumerFactoryService.createRecordConsumerFactory(
                 Long.class,
                 Long.class,
                 (ConsumerRecord<String, Long> consumerRecord) -> {
@@ -43,8 +42,7 @@ public class ActiveConfigurationIdRequestConsumerConfiguration {
                             .<Long>builder()
                             .value(activeConfigurationId)
                             .build();
-                },
-                new CommonLoggingErrorHandler()
+                }
         ).createContainer(requestTopicNameParameters);
     }
 

@@ -11,7 +11,6 @@ import no.fintlabs.kafka.requestreply.topic.RequestTopicService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.listener.CommonLoggingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
 @Configuration
@@ -32,7 +31,7 @@ public class IntegrationRequestConsumerConfiguration {
         requestTopicService
                 .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
-        return requestConsumerFactoryService.createFactory(
+        return requestConsumerFactoryService.createRecordConsumerFactory(
                 Long.class,
                 IntegrationDto.class,
                 (ConsumerRecord<String, Long> consumerRecord) -> ReplyProducerRecord
@@ -40,8 +39,7 @@ public class IntegrationRequestConsumerConfiguration {
                         .value(integrationService
                                 .findById(consumerRecord.value())
                                 .orElse(null))
-                        .build(),
-                new CommonLoggingErrorHandler()
+                        .build()
         ).createContainer(requestTopicNameParameters);
     }
 
@@ -60,7 +58,7 @@ public class IntegrationRequestConsumerConfiguration {
         requestTopicService
                 .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
-        return requestConsumerFactoryService.createFactory(
+        return requestConsumerFactoryService.createRecordConsumerFactory(
                 SourceApplicationIdAndSourceApplicationIntegrationIdDto.class,
                 IntegrationDto.class,
                 (ConsumerRecord<String, SourceApplicationIdAndSourceApplicationIntegrationIdDto> consumerRecord) -> {
@@ -76,8 +74,7 @@ public class IntegrationRequestConsumerConfiguration {
                             .<IntegrationDto>builder()
                             .value(integrationDto)
                             .build();
-                },
-                new CommonLoggingErrorHandler()
+                }
         ).createContainer(requestTopicNameParameters);
     }
 

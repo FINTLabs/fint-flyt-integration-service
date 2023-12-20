@@ -6,6 +6,7 @@ import lombok.extern.jackson.Jacksonized;
 @Getter
 @EqualsAndHashCode
 @Jacksonized
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SourceApplicationIdAndSourceApplicationIntegrationIdDto {
