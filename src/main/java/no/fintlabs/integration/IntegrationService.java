@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,6 +30,12 @@ public class IntegrationService {
     public Collection<IntegrationDto> findAll() {
         return integrationMappingService.toDtos(
                 integrationRepository.findAll()
+        );
+    }
+
+    public Collection<IntegrationDto> findAllBySourceApplicationIds(List<Long> sourceApplicationIds) {
+        return integrationMappingService.toDtos(
+                integrationRepository.findIntegrationsBySourceApplicationIdIn(sourceApplicationIds)
         );
     }
 

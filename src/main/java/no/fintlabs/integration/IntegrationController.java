@@ -6,16 +6,21 @@ import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.validation.IntegrationValidatorFactory;
 import no.fintlabs.integration.validation.ValidationErrorsFormattingService;
+import no.fintlabs.resourceserver.security.client.FintFlytJwtUserConverterService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolation;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
@@ -28,19 +33,31 @@ public class IntegrationController {
     private final IntegrationService integrationService;
     private final IntegrationValidatorFactory integrationValidatorFactory;
     private final ValidationErrorsFormattingService validationErrorsFormattingService;
+    private final FintFlytJwtUserConverterService fintFlytJwtUserConverterService;
+    @Value("${fint.flyt.resource-server.user-permissions-consumer.enabled:false}")
+    private boolean userPermissionsConsumerEnabled;
 
     public IntegrationController(
             IntegrationService integrationService,
             IntegrationValidatorFactory integrationValidatorFactory,
-            ValidationErrorsFormattingService validationErrorsFormattingService
+            ValidationErrorsFormattingService validationErrorsFormattingService, FintFlytJwtUserConverterService fintFlytJwtUserConverterService
     ) {
         this.integrationService = integrationService;
         this.integrationValidatorFactory = integrationValidatorFactory;
         this.validationErrorsFormattingService = validationErrorsFormattingService;
+        this.fintFlytJwtUserConverterService = fintFlytJwtUserConverterService;
     }
 
-    @GetMapping()
-    public ResponseEntity<Collection<IntegrationDto>> getIntegrations() {
+    @GetMapping
+    public ResponseEntity<Collection<IntegrationDto>> getIntegrations(
+            @AuthenticationPrincipal Authentication authentication
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
+                    .convertSourceApplicationIdsStringToList(authentication);
+            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(sourceApplicationIds));
+        }
+
         return ResponseEntity.ok(integrationService.findAll());
     }
 

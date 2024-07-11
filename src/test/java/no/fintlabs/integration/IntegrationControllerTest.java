@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ValidationException;
@@ -41,13 +42,13 @@ public class IntegrationControllerTest {
 
     @Test
     void testGetIntegrations() {
+        Authentication mockAuth = mock(Authentication.class);
         when(integrationService.findAll()).thenReturn(Collections.emptyList());
 
-        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations();
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(mockAuth);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(0, Objects.requireNonNull(response.getBody()).size());
-
         verify(integrationService).findAll();
     }
 
