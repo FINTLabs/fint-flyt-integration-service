@@ -52,13 +52,7 @@ public class IntegrationController {
     public ResponseEntity<Collection<IntegrationDto>> getIntegrations(
             @AuthenticationPrincipal Authentication authentication
     ) {
-        if (userPermissionsConsumerEnabled) {
-            List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
-                    .convertSourceApplicationIdsStringToList(authentication);
-            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(sourceApplicationIds));
-        }
-
-        return ResponseEntity.ok(integrationService.findAll());
+        return getResponseEntityIntegrations(authentication);
     }
 
     @GetMapping(params = {"side", "antall", "sorteringFelt", "sorteringRetning"})
@@ -73,6 +67,18 @@ public class IntegrationController {
                 .withSort(sortDirection, sortProperty);
 
         return ResponseEntity.ok(integrationService.findAll(pageRequest));
+    }
+
+    private ResponseEntity<Collection<IntegrationDto>> getResponseEntityIntegrations(
+            Authentication authentication
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
+                    .convertSourceApplicationIdsStringToList(authentication);
+            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(sourceApplicationIds));
+        }
+
+        return ResponseEntity.ok(integrationService.findAll());
     }
 
     @GetMapping("{integrationId}")
