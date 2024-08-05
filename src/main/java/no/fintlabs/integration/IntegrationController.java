@@ -72,14 +72,11 @@ public class IntegrationController {
     private ResponseEntity<Collection<IntegrationDto>> getResponseEntityIntegrations(
             Authentication authentication
     ) {
-        log.info("userPermissionsConsumerEnabled: {}", userPermissionsConsumerEnabled);
         if (userPermissionsConsumerEnabled) {
             List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
                     .convertSourceApplicationIdsStringToList(authentication);
-            log.info("sourceApplicationIds: {}", sourceApplicationIds);
 
             Collection<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds);
-            allBySourceApplicationIds.forEach(integrationDto -> log.info("integrationDto: {}", integrationDto));
 
             return ResponseEntity.ok(allBySourceApplicationIds);
         }
