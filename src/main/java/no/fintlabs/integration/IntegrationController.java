@@ -10,6 +10,7 @@ import no.fintlabs.resourceserver.security.client.FintFlytJwtUserConverterServic
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,7 @@ public class IntegrationController {
 
     @GetMapping(params = {"side", "antall", "sorteringFelt", "sorteringRetning"})
     public ResponseEntity<Page<IntegrationDto>> getIntegrations(
+            @AuthenticationPrincipal Authentication authentication,
             @RequestParam(name = "side") int page,
             @RequestParam(name = "antall") int size,
             @RequestParam(name = "sorteringFelt") String sortProperty,
@@ -66,7 +68,7 @@ public class IntegrationController {
                 .of(page, size)
                 .withSort(sortDirection, sortProperty);
 
-        return ResponseEntity.ok(integrationService.findAll(pageRequest));
+        return getResponseEntityIntegrations(authentication, pageRequest);
     }
 
     private ResponseEntity<Collection<IntegrationDto>> getResponseEntityIntegrations(
@@ -80,8 +82,22 @@ public class IntegrationController {
 
             return ResponseEntity.ok(allBySourceApplicationIds);
         }
-
         return ResponseEntity.ok(integrationService.findAll());
+    }
+
+    private ResponseEntity<Page<IntegrationDto>> getResponseEntityIntegrations(
+            Authentication authentication,
+            Pageable pageable
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
+                    .convertSourceApplicationIdsStringToList(authentication);
+
+            Page<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageable);
+
+            return ResponseEntity.ok(allBySourceApplicationIds);
+        }
+        return ResponseEntity.ok(integrationService.findAll(pageable));
     }
 
     @GetMapping("{integrationId}")
