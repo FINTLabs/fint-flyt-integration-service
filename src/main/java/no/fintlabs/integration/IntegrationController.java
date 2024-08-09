@@ -101,16 +101,39 @@ public class IntegrationController {
     }
 
     @GetMapping("{integrationId}")
-    public ResponseEntity<IntegrationDto> getIntegration(@PathVariable Long integrationId) {
-        IntegrationDto integrationDto = integrationService
-                .findById(integrationId)
+    public ResponseEntity<IntegrationDto> getIntegration(
+            @AuthenticationPrincipal Authentication authentication,
+            @PathVariable Long integrationId
+    ) {
+        IntegrationDto integrationDto = integrationService.findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (userPermissionsConsumerEnabled) {
+            List<Long> allowedSourceApplicationIds = fintFlytJwtUserConverterService
+                    .convertSourceApplicationIdsStringToList(authentication);
+
+            if (!allowedSourceApplicationIds.contains(integrationDto.getSourceApplicationId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this integration.");
+            }
+        }
 
         return ResponseEntity.ok(integrationDto);
     }
 
     @PostMapping
-    public ResponseEntity<IntegrationDto> postIntegration(@RequestBody IntegrationPostDto integrationPostDto) {
+    public ResponseEntity<IntegrationDto> postIntegration(
+            @AuthenticationPrincipal Authentication authentication,
+            @RequestBody IntegrationPostDto integrationPostDto
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            List<Long> allowedSourceApplicationIds = fintFlytJwtUserConverterService
+                    .convertSourceApplicationIdsStringToList(authentication);
+
+            if (!allowedSourceApplicationIds.contains(integrationPostDto.getSourceApplicationId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to create this integration.");
+            }
+        }
+
         validatePost(integrationPostDto);
         return ResponseEntity.ok(integrationService.save(integrationPostDto));
     }
@@ -136,12 +159,23 @@ public class IntegrationController {
 
     @PatchMapping("{integrationId}")
     public ResponseEntity<IntegrationDto> patchIntegration(
+            @AuthenticationPrincipal Authentication authentication,
             @PathVariable Long integrationId,
             @RequestBody IntegrationPatchDto integrationPatchDto
     ) {
-        IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = integrationService.findById(integrationId)
-                .map(IntegrationDto::toBuilder)
+        IntegrationDto existingIntegration = integrationService.findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (userPermissionsConsumerEnabled) {
+            List<Long> allowedSourceApplicationIds = fintFlytJwtUserConverterService
+                    .convertSourceApplicationIdsStringToList(authentication);
+
+            if (!allowedSourceApplicationIds.contains(existingIntegration.getSourceApplicationId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to modify this integration.");
+            }
+        }
+
+        IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = existingIntegration.toBuilder();
 
         integrationPatchDto.getDestination().ifPresent(integrationDtoBuilder::destination);
         integrationPatchDto.getState().ifPresent(integrationDtoBuilder::state);
