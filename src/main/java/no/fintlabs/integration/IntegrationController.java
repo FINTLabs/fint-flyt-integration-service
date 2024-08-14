@@ -6,7 +6,7 @@ import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.validation.IntegrationValidatorFactory;
 import no.fintlabs.integration.validation.ValidationErrorsFormattingService;
-import no.fintlabs.resourceserver.security.client.FintFlytJwtUserConverterService;
+import no.fintlabs.resourceserver.security.user.UserAuthorizationUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,19 +34,17 @@ public class IntegrationController {
     private final IntegrationService integrationService;
     private final IntegrationValidatorFactory integrationValidatorFactory;
     private final ValidationErrorsFormattingService validationErrorsFormattingService;
-    private final FintFlytJwtUserConverterService fintFlytJwtUserConverterService;
     @Value("${fint.flyt.resource-server.user-permissions-consumer.enabled:false}")
     private boolean userPermissionsConsumerEnabled;
 
     public IntegrationController(
             IntegrationService integrationService,
             IntegrationValidatorFactory integrationValidatorFactory,
-            ValidationErrorsFormattingService validationErrorsFormattingService, FintFlytJwtUserConverterService fintFlytJwtUserConverterService
+            ValidationErrorsFormattingService validationErrorsFormattingService
     ) {
         this.integrationService = integrationService;
         this.integrationValidatorFactory = integrationValidatorFactory;
         this.validationErrorsFormattingService = validationErrorsFormattingService;
-        this.fintFlytJwtUserConverterService = fintFlytJwtUserConverterService;
     }
 
     @GetMapping
@@ -75,11 +73,9 @@ public class IntegrationController {
             Authentication authentication
     ) {
         if (userPermissionsConsumerEnabled) {
-            List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
-                    .convertSourceApplicationIdsStringToList(authentication);
-
+            List<Long> sourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
             Collection<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds);
-
             return ResponseEntity.ok(allBySourceApplicationIds);
         }
         return ResponseEntity.ok(integrationService.findAll());
@@ -90,11 +86,9 @@ public class IntegrationController {
             Pageable pageable
     ) {
         if (userPermissionsConsumerEnabled) {
-            List<Long> sourceApplicationIds = fintFlytJwtUserConverterService
-                    .convertSourceApplicationIdsStringToList(authentication);
-
+            List<Long> sourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
             Page<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageable);
-
             return ResponseEntity.ok(allBySourceApplicationIds);
         }
         return ResponseEntity.ok(integrationService.findAll(pageable));
@@ -109,8 +103,8 @@ public class IntegrationController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (userPermissionsConsumerEnabled) {
-            List<Long> allowedSourceApplicationIds = fintFlytJwtUserConverterService
-                    .convertSourceApplicationIdsStringToList(authentication);
+            List<Long> allowedSourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
 
             if (!allowedSourceApplicationIds.contains(integrationDto.getSourceApplicationId())) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this integration.");
@@ -126,8 +120,8 @@ public class IntegrationController {
             @RequestBody IntegrationPostDto integrationPostDto
     ) {
         if (userPermissionsConsumerEnabled) {
-            List<Long> allowedSourceApplicationIds = fintFlytJwtUserConverterService
-                    .convertSourceApplicationIdsStringToList(authentication);
+            List<Long> allowedSourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
 
             if (!allowedSourceApplicationIds.contains(integrationPostDto.getSourceApplicationId())) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to create this integration.");
@@ -167,8 +161,8 @@ public class IntegrationController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (userPermissionsConsumerEnabled) {
-            List<Long> allowedSourceApplicationIds = fintFlytJwtUserConverterService
-                    .convertSourceApplicationIdsStringToList(authentication);
+            List<Long> allowedSourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
 
             if (!allowedSourceApplicationIds.contains(existingIntegration.getSourceApplicationId())) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to modify this integration.");
