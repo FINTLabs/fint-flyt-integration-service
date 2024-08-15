@@ -31,9 +31,11 @@ public class IntegrationControllerTest {
     @Mock
     private IntegrationValidatorFactory integrationValidatorFactory;
 
+    @Mock
+    Authentication authentication;
+
     @InjectMocks
     private IntegrationController controller;
-
 
     @BeforeEach
     void setUp() {
@@ -70,8 +72,7 @@ public class IntegrationControllerTest {
     void testGetIntegrationNotFound() {
         when(integrationService.findById(1L)).thenReturn(Optional.empty());
 
-        Authentication mockAuthentication = mock(Authentication.class);
-        assertThrows(ResponseStatusException.class, () -> controller.getIntegration(mockAuthentication, 1L));
+        assertThrows(ResponseStatusException.class, () -> controller.getIntegration(authentication, 1L));
 
         verify(integrationService).findById(1L);
     }
@@ -87,8 +88,7 @@ public class IntegrationControllerTest {
 
         when(integrationService.save(postDto)).thenReturn(mockDto);
 
-        Authentication mockAuthentication = mock(Authentication.class);
-        ResponseEntity<IntegrationDto> response = controller.postIntegration(mockAuthentication, postDto);
+        ResponseEntity<IntegrationDto> response = controller.postIntegration(authentication, postDto);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(mockDto, response.getBody());
@@ -101,8 +101,7 @@ public class IntegrationControllerTest {
         IntegrationPostDto postDto = IntegrationPostDto.builder().build();
         when(integrationValidatorFactory.getValidator()).thenThrow(ValidationException.class);
 
-        Authentication mockAuthentication = mock(Authentication.class);
-        assertThrows(ValidationException.class, () -> controller.postIntegration(mockAuthentication, postDto));
+        assertThrows(ValidationException.class, () -> controller.postIntegration(authentication, postDto));
     }
 
     // TODO: 18/08/2023 add test for patchIntegration
