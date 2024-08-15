@@ -1,8 +1,5 @@
 fint:
   application-id: fint-flyt-integration-service
-  flyt:
-    user-permissions-consumer:
-      enabled: true
 server:
   error:
     include-message: always
