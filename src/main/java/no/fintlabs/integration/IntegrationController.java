@@ -103,12 +103,7 @@ public class IntegrationController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (userPermissionsConsumerEnabled) {
-            List<Long> allowedSourceApplicationIds =
-                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
-
-            if (!allowedSourceApplicationIds.contains(integrationDto.getSourceApplicationId())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this integration.");
-            }
+            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, integrationDto.getSourceApplicationId());
         }
 
         return ResponseEntity.ok(integrationDto);
@@ -120,12 +115,7 @@ public class IntegrationController {
             @RequestBody IntegrationPostDto integrationPostDto
     ) {
         if (userPermissionsConsumerEnabled) {
-            List<Long> allowedSourceApplicationIds =
-                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
-
-            if (!allowedSourceApplicationIds.contains(integrationPostDto.getSourceApplicationId())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to create this integration.");
-            }
+            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, integrationPostDto.getSourceApplicationId());
         }
 
         validatePost(integrationPostDto);
@@ -161,12 +151,7 @@ public class IntegrationController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (userPermissionsConsumerEnabled) {
-            List<Long> allowedSourceApplicationIds =
-                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
-
-            if (!allowedSourceApplicationIds.contains(existingIntegration.getSourceApplicationId())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to modify this integration.");
-            }
+            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, existingIntegration.getSourceApplicationId());
         }
 
         IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = existingIntegration.toBuilder();
