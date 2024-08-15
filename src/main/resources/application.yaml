@@ -1,8 +1,5 @@
 fint:
   application-id: fint-flyt-integration-service
-  cache:
-    defaultCacheEntryTimeToLiveMillis: 600000
-    defaultCacheHeapSize: 1000000
 server:
   error:
     include-message: always
