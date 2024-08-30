@@ -6,16 +6,22 @@ import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.validation.IntegrationValidatorFactory;
 import no.fintlabs.integration.validation.ValidationErrorsFormattingService;
+import no.fintlabs.resourceserver.security.user.UserAuthorizationUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolation;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
@@ -28,6 +34,8 @@ public class IntegrationController {
     private final IntegrationService integrationService;
     private final IntegrationValidatorFactory integrationValidatorFactory;
     private final ValidationErrorsFormattingService validationErrorsFormattingService;
+    @Value("${fint.flyt.resource-server.user-permissions-consumer.enabled:false}")
+    private boolean userPermissionsConsumerEnabled;
 
     public IntegrationController(
             IntegrationService integrationService,
@@ -39,13 +47,16 @@ public class IntegrationController {
         this.validationErrorsFormattingService = validationErrorsFormattingService;
     }
 
-    @GetMapping()
-    public ResponseEntity<Collection<IntegrationDto>> getIntegrations() {
-        return ResponseEntity.ok(integrationService.findAll());
+    @GetMapping
+    public ResponseEntity<Collection<IntegrationDto>> getIntegrations(
+            @AuthenticationPrincipal Authentication authentication
+    ) {
+        return getResponseEntityIntegrations(authentication);
     }
 
     @GetMapping(params = {"side", "antall", "sorteringFelt", "sorteringRetning"})
     public ResponseEntity<Page<IntegrationDto>> getIntegrations(
+            @AuthenticationPrincipal Authentication authentication,
             @RequestParam(name = "side") int page,
             @RequestParam(name = "antall") int size,
             @RequestParam(name = "sorteringFelt") String sortProperty,
@@ -55,20 +66,58 @@ public class IntegrationController {
                 .of(page, size)
                 .withSort(sortDirection, sortProperty);
 
-        return ResponseEntity.ok(integrationService.findAll(pageRequest));
+        return getResponseEntityIntegrations(authentication, pageRequest);
+    }
+
+    private ResponseEntity<Collection<IntegrationDto>> getResponseEntityIntegrations(
+            Authentication authentication
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            List<Long> sourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
+            Collection<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds);
+            return ResponseEntity.ok(allBySourceApplicationIds);
+        }
+        return ResponseEntity.ok(integrationService.findAll());
+    }
+
+    private ResponseEntity<Page<IntegrationDto>> getResponseEntityIntegrations(
+            Authentication authentication,
+            Pageable pageable
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            List<Long> sourceApplicationIds =
+                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
+            Page<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageable);
+            return ResponseEntity.ok(allBySourceApplicationIds);
+        }
+        return ResponseEntity.ok(integrationService.findAll(pageable));
     }
 
     @GetMapping("{integrationId}")
-    public ResponseEntity<IntegrationDto> getIntegration(@PathVariable Long integrationId) {
-        IntegrationDto integrationDto = integrationService
-                .findById(integrationId)
+    public ResponseEntity<IntegrationDto> getIntegration(
+            @AuthenticationPrincipal Authentication authentication,
+            @PathVariable Long integrationId
+    ) {
+        IntegrationDto integrationDto = integrationService.findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (userPermissionsConsumerEnabled) {
+            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, integrationDto.getSourceApplicationId());
+        }
 
         return ResponseEntity.ok(integrationDto);
     }
 
     @PostMapping
-    public ResponseEntity<IntegrationDto> postIntegration(@RequestBody IntegrationPostDto integrationPostDto) {
+    public ResponseEntity<IntegrationDto> postIntegration(
+            @AuthenticationPrincipal Authentication authentication,
+            @RequestBody IntegrationPostDto integrationPostDto
+    ) {
+        if (userPermissionsConsumerEnabled) {
+            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, integrationPostDto.getSourceApplicationId());
+        }
+
         validatePost(integrationPostDto);
         return ResponseEntity.ok(integrationService.save(integrationPostDto));
     }
@@ -94,12 +143,18 @@ public class IntegrationController {
 
     @PatchMapping("{integrationId}")
     public ResponseEntity<IntegrationDto> patchIntegration(
+            @AuthenticationPrincipal Authentication authentication,
             @PathVariable Long integrationId,
             @RequestBody IntegrationPatchDto integrationPatchDto
     ) {
-        IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = integrationService.findById(integrationId)
-                .map(IntegrationDto::toBuilder)
+        IntegrationDto existingIntegration = integrationService.findById(integrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (userPermissionsConsumerEnabled) {
+            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, existingIntegration.getSourceApplicationId());
+        }
+
+        IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = existingIntegration.toBuilder();
 
         integrationPatchDto.getDestination().ifPresent(integrationDtoBuilder::destination);
         integrationPatchDto.getState().ifPresent(integrationDtoBuilder::state);

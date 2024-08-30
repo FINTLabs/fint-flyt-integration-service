@@ -145,7 +145,7 @@ public class IntegrationServiceTest {
         Integration integration = new Integration();
         IntegrationDto integrationDto = IntegrationDto.builder().build();
 
-        when(integrationRepository.getById(id)).thenReturn(integration);
+        when(integrationRepository.getReferenceById(id)).thenReturn(integration);
         when(integrationRepository.save(integration)).thenReturn(integration);
         when(integrationMappingService.toDto(integration)).thenReturn(integrationDto);
 
