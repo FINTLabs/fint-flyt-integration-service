@@ -2,25 +2,25 @@ package no.fintlabs.integration;
 
 import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
+import no.fintlabs.integration.model.entities.Integration;
 import no.fintlabs.integration.validation.IntegrationValidatorFactory;
+import no.fintlabs.resourceserver.security.user.UserAuthorizationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ValidationException;
 import javax.validation.Validator;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class IntegrationControllerTest {
@@ -43,11 +43,10 @@ public class IntegrationControllerTest {
     }
 
     @Test
-    void testGetIntegrations() {
-        Authentication mockAuth = mock(Authentication.class);
+    public void shouldReturnAllIntegrationsWithUserPermissionsDisabled() {
         when(integrationService.findAll()).thenReturn(Collections.emptyList());
 
-        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(mockAuth);
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(0, Objects.requireNonNull(response.getBody()).size());
@@ -55,12 +54,53 @@ public class IntegrationControllerTest {
     }
 
     @Test
+    public void shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() throws NoSuchFieldException, IllegalAccessException {
+        setUserPermissionsConsumerEnabled();
+
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("sourceApplicationIds")).thenReturn("1,2");
+        when(authentication.getPrincipal()).thenReturn(jwt);
+
+        List<Long> sourceApplicationIds = UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
+
+        IntegrationDto integration1 = IntegrationDto.builder()
+                .id(1L)
+                .sourceApplicationId(1L)
+                .destination("Destination 1")
+                .state(Integration.State.ACTIVE)
+                .build();
+
+        IntegrationDto integration2 = IntegrationDto.builder()
+                .id(2L)
+                .sourceApplicationId(2L)
+                .destination("Destination 2")
+                .state(Integration.State.DEACTIVATED)
+                .build();
+
+        List<IntegrationDto> expectedIntegrations = Arrays.asList(integration1, integration2);
+
+        when(integrationService.findAllBySourceApplicationIds(sourceApplicationIds))
+                .thenReturn(expectedIntegrations);
+
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication);
+
+        assertEquals(HttpStatus.OK.value(), response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        assertTrue(response.getBody().contains(integration1));
+        assertTrue(response.getBody().contains(integration2));
+
+        verify(integrationService).findAllBySourceApplicationIds(sourceApplicationIds);
+        verify(integrationService, never()).findAll();
+    }
+
+
+    @Test
     void testGetIntegrationFound() {
         IntegrationDto mockDto = IntegrationDto.builder().id(1L).destination("destination").build();
         when(integrationService.findById(1L)).thenReturn(Optional.of(mockDto));
 
-        Authentication mockAuthentication = mock(Authentication.class);
-        ResponseEntity<IntegrationDto> response = controller.getIntegration(mockAuthentication, 1L);
+        ResponseEntity<IntegrationDto> response = controller.getIntegration(authentication, 1L);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(mockDto, response.getBody());
@@ -104,35 +144,10 @@ public class IntegrationControllerTest {
         assertThrows(ValidationException.class, () -> controller.postIntegration(authentication, postDto));
     }
 
-    // TODO: 18/08/2023 add test for patchIntegration
-//    @Test
-//    void testPatchIntegration() {
-//
-//
-//
-//
-//        IntegrationPatchDto patchDto = IntegrationPatchDto.builder().destination("new_destination").build();
-//        IntegrationDto existingIntegrationDto = IntegrationDto.builder().id(1L).destination("existing_destination").build();
-////        when(existingIntegrationDto.getId()).thenReturn(1L);
-////        when(existingIntegrationDto.getDestination()).thenReturn("existing_destination");
-//        IntegrationDto patchedDto = IntegrationDto.builder().id(1L).destination("new_destination").build();
-//
-//        Long mockActiveConfigurationId = 123L;
-//
-//        when(existingIntegrationDto.getActiveConfigurationId()).thenReturn(mockActiveConfigurationId);
-//        Validator mockPatchValidator = mock(Validator.class);
-//        when(integrationValidatorFactory.getPatchValidator(1L, mockActiveConfigurationId)).thenReturn(mockPatchValidator);
-//
-//        when(integrationService.findById(1L)).thenReturn(Optional.of(existingIntegrationDto));
-//
-//        when(integrationService.updateById(1L, patchDto)).thenReturn(patchedDto);
-//
-//        ResponseEntity<IntegrationDto> response = controller.patchIntegration(1L, patchDto);
-//
-//        assertEquals(200, response.getStatusCodeValue());
-//        assertEquals(patchedDto, response.getBody());
-//
-//        verify(integrationService).updateById(1L, patchDto);
-//    }
+    private void setUserPermissionsConsumerEnabled() throws NoSuchFieldException, IllegalAccessException {
+        java.lang.reflect.Field field = IntegrationController.class.getDeclaredField("userPermissionsConsumerEnabled");
+        field.setAccessible(true);
+        field.set(controller, true);
+    }
 
 }
