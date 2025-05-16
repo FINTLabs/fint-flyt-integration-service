@@ -26,7 +26,7 @@ public class ActiveConfigurationIdRequestConsumerConfiguration {
                 .parameterName("integration-id")
                 .build();
         requestTopicService
-                .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
+                .ensureTopic(requestTopicNameParameters, 345600000, TopicCleanupPolicyParameters.builder().build());
 
         return requestConsumerFactoryService.createRecordConsumerFactory(
                 Long.class,
