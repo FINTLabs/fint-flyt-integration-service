@@ -29,7 +29,7 @@ public class IntegrationRequestConsumerConfiguration {
                 .parameterName("integration-id")
                 .build();
         requestTopicService
-                .ensureTopic(requestTopicNameParameters, 345600000, TopicCleanupPolicyParameters.builder().build());
+                .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
         return requestConsumerFactoryService.createRecordConsumerFactory(
                 Long.class,
@@ -56,7 +56,7 @@ public class IntegrationRequestConsumerConfiguration {
                 .parameterName("source-application-id-and-source-application-integration-id")
                 .build();
         requestTopicService
-                .ensureTopic(requestTopicNameParameters, 345600000, TopicCleanupPolicyParameters.builder().build());
+                .ensureTopic(requestTopicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
         return requestConsumerFactoryService.createRecordConsumerFactory(
                 SourceApplicationIdAndSourceApplicationIntegrationIdDto.class,
