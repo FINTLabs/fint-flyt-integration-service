@@ -34,7 +34,7 @@ patches:
           }
       - op: replace
         path: "/spec/probes/readiness/path"
-        value: "/beta/vlfk-no/actuator/health"
+        value: "/beta/vlfk-no/integration-service/actuator/health"
 
     target:
       kind: Application
