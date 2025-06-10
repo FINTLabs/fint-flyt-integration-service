@@ -50,14 +50,14 @@ spec:
     requests:
       memory: "512Mi"
       cpu: "50m"
-  probes:
-    readiness:
-      path: /actuator/health
-      port: 8080
-      initialDelaySeconds: 0
-      failureThreshold: 5
-      periodSeconds: 10
-      timeoutSeconds: 3
+#  probes:
+#    readiness:
+#      path: /actuator/health
+#      port: 8080
+#      initialDelaySeconds: 0
+#      failureThreshold: 5
+#      periodSeconds: 10
+#      timeoutSeconds: 3
   restartPolicy: Always
   replicas: 1
   strategy:
