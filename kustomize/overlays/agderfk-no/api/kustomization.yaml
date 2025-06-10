@@ -32,9 +32,9 @@ patches:
             "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
             "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
           }
-      - op: replace
-        path: "/spec/probes/readiness/path"
-        value: "/agderfk-no/actuator/health"
+#      - op: replace
+#        path: "/spec/probes/readiness/path"
+#        value: "/agderfk-no/actuator/health"
 
     target:
       kind: Application
