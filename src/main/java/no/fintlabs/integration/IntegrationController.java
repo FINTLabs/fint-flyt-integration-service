@@ -49,9 +49,10 @@ public class IntegrationController {
 
     @GetMapping
     public ResponseEntity<Collection<IntegrationDto>> getIntegrations(
-            @AuthenticationPrincipal Authentication authentication
+            @AuthenticationPrincipal Authentication authentication,
+            @RequestParam(required = false) Long sourceApplicationId
     ) {
-        return getResponseEntityIntegrations(authentication);
+        return getResponseEntityIntegrations(authentication, sourceApplicationId);
     }
 
     @GetMapping(params = {"side", "antall", "sorteringFelt", "sorteringRetning"})
@@ -60,34 +61,58 @@ public class IntegrationController {
             @RequestParam(name = "side") int page,
             @RequestParam(name = "antall") int size,
             @RequestParam(name = "sorteringFelt") String sortProperty,
-            @RequestParam(name = "sorteringRetning") Sort.Direction sortDirection
+            @RequestParam(name = "sorteringRetning") Sort.Direction sortDirection,
+            @RequestParam(required = false) Long sourceApplicationId
     ) {
         PageRequest pageRequest = PageRequest
                 .of(page, size)
                 .withSort(sortDirection, sortProperty);
 
-        return getResponseEntityIntegrations(authentication, pageRequest);
+        return getResponseEntityIntegrations(authentication, pageRequest, sourceApplicationId);
     }
 
     private ResponseEntity<Collection<IntegrationDto>> getResponseEntityIntegrations(
-            Authentication authentication
+            Authentication authentication,
+            Long sourceApplicationId
     ) {
         if (userPermissionsConsumerEnabled) {
             List<Long> sourceApplicationIds =
                     UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
-            Collection<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds);
-            return ResponseEntity.ok(allBySourceApplicationIds);
+
+            if (sourceApplicationId != null) {
+                if (!sourceApplicationIds.contains(sourceApplicationId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+                return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(List.of(sourceApplicationId)));
+            }
+
+            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(sourceApplicationIds));
         }
+
+        if (sourceApplicationId != null) {
+            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(List.of(sourceApplicationId)));
+        }
+
         return ResponseEntity.ok(integrationService.findAll());
     }
 
     private ResponseEntity<Page<IntegrationDto>> getResponseEntityIntegrations(
             Authentication authentication,
-            Pageable pageable
+            Pageable pageable,
+            Long sourceApplicationId
     ) {
         if (userPermissionsConsumerEnabled) {
             List<Long> sourceApplicationIds =
                     UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
+
+            if (sourceApplicationId != null) {
+                if (!sourceApplicationIds.contains(sourceApplicationId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+                Page<IntegrationDto> allBySourceApplicationId = integrationService.findAllBySourceApplicationIds(List.of(sourceApplicationId), pageable);
+                return ResponseEntity.ok(allBySourceApplicationId);
+            }
+
             Page<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageable);
             return ResponseEntity.ok(allBySourceApplicationIds);
         }
