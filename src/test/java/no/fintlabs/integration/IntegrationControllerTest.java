@@ -46,11 +46,22 @@ public class IntegrationControllerTest {
     public void shouldReturnAllIntegrationsWithUserPermissionsDisabled() {
         when(integrationService.findAll()).thenReturn(Collections.emptyList());
 
-        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication);
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, null);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(0, Objects.requireNonNull(response.getBody()).size());
         verify(integrationService).findAll();
+    }
+
+    @Test
+    public void shouldReturnSpecificIntegrationsBasedOnProvidedSourceApplicationIdWithUserPermissionsDisabled() {
+        when(integrationService.findAll()).thenReturn(Collections.emptyList());
+
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, 1L);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(0, Objects.requireNonNull(response.getBody()).size());
+        verify(integrationService).findAllBySourceApplicationIds(List.of(1L));
     }
 
     @Test
@@ -82,7 +93,7 @@ public class IntegrationControllerTest {
         when(integrationService.findAllBySourceApplicationIds(sourceApplicationIds))
                 .thenReturn(expectedIntegrations);
 
-        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication);
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, null);
 
         assertEquals(HttpStatus.OK.value(), response.getStatusCodeValue());
         assertNotNull(response.getBody());
