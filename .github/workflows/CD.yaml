@@ -2,8 +2,7 @@ name: CD
 
 on:
   repository_dispatch:
-    types:
-      - trigger-cd
+    types: [ trigger-cd ]
 
 env:
   REGISTRY: ghcr.io
@@ -85,17 +84,20 @@ jobs:
         id: rg
         with:
           script: |
-            const p = '${{ matrix.cluster }}'.split('-');
-            return `rg-aks-${p[1]}`;
+            const parts = '${{ matrix.cluster }}'.split('-');
+            return `rg-aks-${parts[1]}`;
           result-encoding: string
       - uses: azure/k8s-bake@v2
         id: bake
         with:
           renderEngine: kustomize
           kustomizationPath: kustomize/overlays/${{ matrix.org }}/${{ steps.environment.outputs.result }}
+      - id: secretname
+        run: |
+          echo "SECRET_NAME=$(echo AKS_${{ steps.environment.outputs.result }}_FINT_GITHUB | tr '[:lower:]' '[:upper:]')" >> $GITHUB_OUTPUT
       - uses: azure/login@v1
         with:
-          creds: ${{ secrets[ format('AKS_{0}_FINT_GITHUB', toUpper(steps.environment.outputs.result)) ] }}
+          creds: ${{ secrets[ steps.secretname.outputs.SECRET_NAME ] }}
       - uses: azure/use-kubelogin@v1
         with:
           kubelogin-version: 'v0.0.32'
