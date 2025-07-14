@@ -21,12 +21,18 @@ jobs:
           gradle-version: wrapper
       - run: ./gradlew build
       - uses: actions/upload-artifact@v4
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
           name: ${{ github.sha }}
           path: ./build/libs/*.jar
-      - uses: peter-evans/repository-dispatch@v3
+      - if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.GITHUBACTION_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           event-type: trigger-cd
+          client-payload: |
+            {
+              "sha": "${{ github.sha }}",
+              "run_id": ${{ github.run_id }}
+            }
