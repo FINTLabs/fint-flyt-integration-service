@@ -13,10 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get repo name
-        id: get_repo
-        run: echo "REPO=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
-
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -32,16 +28,13 @@ jobs:
           gradle-version: wrapper
 
       - name: Gradle build
-        run: |
-          ./gradlew build
-          mkdir data
-          cp ./build/libs/${GITHUB_REPOSITORY#*/}-*.jar ./data/app.jar
+        run: ./gradlew build
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{steps.get_repo.outputs.REPO}}
-          path: ./data/app.jar
+          name: ${{ github.sha }}
+          path: ./build/libs/*.jar
 
       - name: Trigger CD
         if: github.ref == 'refs/heads/main'
