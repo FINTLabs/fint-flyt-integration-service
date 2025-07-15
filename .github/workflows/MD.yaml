@@ -67,7 +67,7 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
       - uses: gradle/actions/wrapper-validation@v3
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           gradle-version: wrapper
       - run: ./gradlew build
@@ -81,14 +81,14 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: type=sha,enable=true,priority=100,prefix=sha-,suffix=,format=short
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - id: bake
-        uses: azure/k8s-bake@v2
+        uses: azure/k8s-bake@v3
         with:
           renderEngine: 'kustomize'
           kustomizationPath: kustomize/overlays/${{ env.ORG }}/${{ steps.environment.outputs.result }}
@@ -96,16 +96,16 @@ jobs:
         id: secretname
         run: |
           echo "SECRET_NAME=$(echo AKS_${{ steps.environment.outputs.result }}_FINT_GITHUB | tr '[:lower:]' '[:upper:]')" >> $GITHUB_OUTPUT
-      - uses: azure/login@v1
+      - uses: azure/login@v2
         with:
           creds: ${{ secrets[ steps.secretname.outputs.SECRET_NAME ] }}
-      - uses: azure/aks-set-context@v3
+      - uses: azure/aks-set-context@v4
         with:
           cluster-name: ${{ env.CLUSTER_NAME }}
           resource-group: ${{ steps.rg.outputs.result }}
           admin: true
           use-kubelogin: true
-      - uses: azure/k8s-deploy@v4
+      - uses: azure/k8s-deploy@v5
         with:
           action: deploy
           manifests: ${{ steps.bake.outputs.manifestsBundle }}
