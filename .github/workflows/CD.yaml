@@ -1,0 +1,98 @@
+name: CD Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+  packages: read      # only need to pull the image
+
+jobs:
+  deploy-to-aks:
+    name: Deploy to AKS
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        org:
+          - afk-no
+          - agderfk-no
+          - bfk-no
+          - ffk-no
+          - innlandetfylke-no
+          - mrfylke-no
+          - nfk-no
+          - ofk-no
+          - rogfk-no
+          - telemarkfylke-no
+          - tromsfylke-no
+          - trondelagfylke-no
+          - vestfoldfylke-no
+          - vlfk-no
+        cluster:
+          - aks-beta-fint-2021-11-23
+          - aks-api-fint-2022-02-08
+        exclude:
+          - org: fintlabs-no
+            cluster: aks-api-fint-2022-02-08
+          - org: mrfylke-no
+            cluster: aks-beta-fint-2021-11-23
+          - org: nfk-no
+            cluster: aks-beta-fint-2021-11-23
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract environment (e.g. “beta” / “api”)
+        uses: actions/github-script@v7
+        id: environment
+        with:
+          script: return '${{ matrix.cluster }}'.split('-')[1]
+          result-encoding: string
+
+      - name: Compute resource group
+        uses: actions/github-script@v7
+        id: resource-group
+        with:
+          script: return 'rg-aks-${{ steps.environment.outputs.result }}'
+          result-encoding: string
+
+      - name: Bake kustomize manifests
+        uses: azure/k8s-bake@v3
+        id: bake
+        with:
+          renderEngine: kustomize
+          kustomizationPath: kustomize/overlays/${{ matrix.org }}/${{ steps.environment.outputs.result }}
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets[ format('AKS_{0}_FINT_GITHUB', steps.environment.outputs.result) ] }}
+
+      - name: Install kubelogin
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.0.32'
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          cluster-name: ${{ matrix.cluster }}
+          resource-group: ${{ steps.resource-group.outputs.result }}
+          admin: true
+          use-kubelogin: true
+
+      - name: Deploy to AKS
+        uses: azure/k8s-deploy@v5
+        with:
+          action: deploy
+          manifests: ${{ steps.bake.outputs.manifestsBundle }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          namespace: ${{ matrix.org }}
