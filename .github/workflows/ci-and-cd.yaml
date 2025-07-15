@@ -5,12 +5,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - kustomize/**
-      - src/**
-      - build.gradle
-      - settings.gradle
-      - Dockerfile
 
 env:
   REGISTRY: ghcr.io
@@ -44,7 +38,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           tags: type=sha,enable=true,priority=100,prefix=shaF-,suffix=,format=short
       - uses: docker/build-push-action@v5
         with:
@@ -54,9 +48,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy-to-aks:
+    name: Deploy to AKS
     needs: build-and-publish
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    name: Deploy to AKS for ${{ matrix.org }}/${{ matrix.cluster }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -99,25 +93,23 @@ jobs:
       - uses: actions/github-script@v7
         id: resource-group
         with:
-          script: |
-            const parts = '${{ matrix.cluster }}'.split('-');
-            return `rg-aks-${parts[1]}`;
+          script: return 'rg-aks-${{ steps.environment.outputs.result }}'
           result-encoding: string
       - uses: azure/k8s-bake@v2
         id: bake
         with:
           renderEngine: kustomize
-          kustomizationPath: kustomize/overlays/${{ matrix.org }}/${{ steps.environment.outputs.result }}
+          kustomizationPath: 'kustomize/overlays/${{ matrix.org }}/${{ steps.environment.outputs.result }}'
       - uses: azure/login@v1
         with:
-          creds: ${{ secrets[ format('AKS_{0}_FINT_GITHUB', steps.environment.outputs.result) ] }}
+          creds: "${{ secrets[ format('AKS_{0}_FINT_GITHUB', steps.environment.outputs.result) ] }}"
       - uses: azure/use-kubelogin@v1
         with:
           kubelogin-version: 'v0.0.32'
       - uses: azure/aks-set-context@v3
         with:
-          cluster-name: ${{ matrix.cluster }}
-          resource-group: ${{ steps.resource-group.outputs.result }}
+          cluster-name: '${{ matrix.cluster }}'
+          resource-group: '${{ steps.resource-group.outputs.result }}'
           admin: true
           use-kubelogin: true
       - uses: azure/k8s-deploy@v4
