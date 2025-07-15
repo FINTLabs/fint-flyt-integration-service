@@ -26,7 +26,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/wrapper-validation@v3
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
       - run: ./gradlew build
@@ -40,7 +40,7 @@ jobs:
         with:
           images: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           tags: type=sha,enable=true,priority=100,prefix=shaF-,suffix=,format=short
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ github.ref == 'refs/heads/main' }}
@@ -95,24 +95,24 @@ jobs:
         with:
           script: return 'rg-aks-${{ steps.environment.outputs.result }}'
           result-encoding: string
-      - uses: azure/k8s-bake@v2
+      - uses: azure/k8s-bake@v3
         id: bake
         with:
           renderEngine: kustomize
           kustomizationPath: 'kustomize/overlays/${{ matrix.org }}/${{ steps.environment.outputs.result }}'
-      - uses: azure/login@v1
+      - uses: azure/login@v2
         with:
           creds: "${{ secrets[ format('AKS_{0}_FINT_GITHUB', steps.environment.outputs.result) ] }}"
       - uses: azure/use-kubelogin@v1
         with:
           kubelogin-version: 'v0.0.32'
-      - uses: azure/aks-set-context@v3
+      - uses: azure/aks-set-context@v4
         with:
           cluster-name: '${{ matrix.cluster }}'
           resource-group: '${{ steps.resource-group.outputs.result }}'
           admin: true
           use-kubelogin: true
-      - uses: azure/k8s-deploy@v4
+      - uses: azure/k8s-deploy@v5
         with:
           action: deploy
           manifests: ${{ steps.bake.outputs.manifestsBundle }}
