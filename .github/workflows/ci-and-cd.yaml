@@ -48,7 +48,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy-to-aks:
-    name: Deploy to AKS
+    name: deploy for ${{ matrix.org }} to ${{ matrix.cluster }}
     needs: build-and-publish
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
