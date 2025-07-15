@@ -11,7 +11,7 @@ env:
 
 permissions:
   contents: read
-  packages: read      # only need to pull the image
+  packages: read
 
 jobs:
   deploy-to-aks:
