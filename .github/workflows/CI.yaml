@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - '**'
+      - main
 
 env:
   REGISTRY: ghcr.io
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java 17
