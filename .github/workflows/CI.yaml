@@ -52,12 +52,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true                                # always push
+          push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      # (optional) upload the JAR as an artifact if you need it elsewhere
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-jar
-          path: build/libs/*.jar
