@@ -1,12 +1,13 @@
 package no.fintlabs.integration;
 
+import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.integration.model.dtos.IntegrationDto;
 import no.fintlabs.integration.model.dtos.IntegrationPatchDto;
 import no.fintlabs.integration.model.dtos.IntegrationPostDto;
 import no.fintlabs.integration.validation.IntegrationValidatorFactory;
 import no.fintlabs.integration.validation.ValidationErrorsFormattingService;
-import no.fintlabs.resourceserver.security.user.UserAuthorizationUtil;
+import no.fintlabs.resourceserver.security.user.UserAuthorizationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,12 +17,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.ConstraintViolation;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
@@ -34,17 +40,19 @@ public class IntegrationController {
     private final IntegrationService integrationService;
     private final IntegrationValidatorFactory integrationValidatorFactory;
     private final ValidationErrorsFormattingService validationErrorsFormattingService;
+    private final UserAuthorizationService userAuthorizationService;
     @Value("${fint.flyt.resource-server.user-permissions-consumer.enabled:false}")
     private boolean userPermissionsConsumerEnabled;
 
     public IntegrationController(
             IntegrationService integrationService,
             IntegrationValidatorFactory integrationValidatorFactory,
-            ValidationErrorsFormattingService validationErrorsFormattingService
-    ) {
+            ValidationErrorsFormattingService validationErrorsFormattingService,
+            UserAuthorizationService userAuthorizationService) {
         this.integrationService = integrationService;
         this.integrationValidatorFactory = integrationValidatorFactory;
         this.validationErrorsFormattingService = validationErrorsFormattingService;
+        this.userAuthorizationService = userAuthorizationService;
     }
 
     @GetMapping
@@ -76,21 +84,21 @@ public class IntegrationController {
             Long sourceApplicationId
     ) {
         if (userPermissionsConsumerEnabled) {
-            List<Long> sourceApplicationIds =
-                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
+            Set<Long> sourceApplicationIds =
+                    userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication);
 
             if (sourceApplicationId != null) {
                 if (!sourceApplicationIds.contains(sourceApplicationId)) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                 }
-                return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(List.of(sourceApplicationId)));
+                return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(Set.of(sourceApplicationId)));
             }
 
             return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(sourceApplicationIds));
         }
 
         if (sourceApplicationId != null) {
-            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(List.of(sourceApplicationId)));
+            return ResponseEntity.ok(integrationService.findAllBySourceApplicationIds(Set.of(sourceApplicationId)));
         }
 
         return ResponseEntity.ok(integrationService.findAll());
@@ -102,18 +110,22 @@ public class IntegrationController {
             Long sourceApplicationId
     ) {
         if (userPermissionsConsumerEnabled) {
-            List<Long> sourceApplicationIds =
-                    UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
+            Set<Long> sourceApplicationIds =
+                    userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication);
 
             if (sourceApplicationId != null) {
                 if (!sourceApplicationIds.contains(sourceApplicationId)) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
                 }
-                Page<IntegrationDto> allBySourceApplicationId = integrationService.findAllBySourceApplicationIds(List.of(sourceApplicationId), pageable);
+                Page<IntegrationDto> allBySourceApplicationId = integrationService.findAllBySourceApplicationIds(
+                        Set.of(sourceApplicationId), pageable
+                );
                 return ResponseEntity.ok(allBySourceApplicationId);
             }
 
-            Page<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageable);
+            Page<IntegrationDto> allBySourceApplicationIds = integrationService.findAllBySourceApplicationIds(
+                    sourceApplicationIds, pageable
+            );
             return ResponseEntity.ok(allBySourceApplicationIds);
         }
         return ResponseEntity.ok(integrationService.findAll(pageable));
@@ -128,7 +140,9 @@ public class IntegrationController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (userPermissionsConsumerEnabled) {
-            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, integrationDto.getSourceApplicationId());
+            userAuthorizationService.checkIfUserHasAccessToSourceApplication(
+                    authentication,
+                    integrationDto.getSourceApplicationId());
         }
 
         return ResponseEntity.ok(integrationDto);
@@ -140,7 +154,9 @@ public class IntegrationController {
             @RequestBody IntegrationPostDto integrationPostDto
     ) {
         if (userPermissionsConsumerEnabled) {
-            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, integrationPostDto.getSourceApplicationId());
+            userAuthorizationService.checkIfUserHasAccessToSourceApplication(
+                    authentication,
+                    integrationPostDto.getSourceApplicationId());
         }
 
         validatePost(integrationPostDto);
@@ -176,7 +192,7 @@ public class IntegrationController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (userPermissionsConsumerEnabled) {
-            UserAuthorizationUtil.checkIfUserHasAccessToSourceApplication(authentication, existingIntegration.getSourceApplicationId());
+            userAuthorizationService.checkIfUserHasAccessToSourceApplication(authentication, existingIntegration.getSourceApplicationId());
         }
 
         IntegrationDto.IntegrationDtoBuilder integrationDtoBuilder = existingIntegration.toBuilder();

@@ -1,11 +1,10 @@
 package no.fintlabs.integration.validation;
 
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import no.fintlabs.integration.kafka.ConfigurationRequestProducerService;
 import org.hibernate.validator.HibernateValidatorFactory;
 import org.springframework.stereotype.Service;
-
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 
 @Service
 public class IntegrationValidatorFactory {

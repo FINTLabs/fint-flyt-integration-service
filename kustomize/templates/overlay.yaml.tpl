@@ -1,46 +1,41 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: tromsfylke-no
+namespace: $NAMESPACE
 
 resources:
   - ../../../base
 
 labels:
   - pairs:
-      app.kubernetes.io/instance: fint-flyt-integration-service_tromsfylke_no
-      fintlabs.no/org-id: tromsfylke.no
+      app.kubernetes.io/instance: $APP_INSTANCE
+      fintlabs.no/org-id: $ORG_ID
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/kafka/acls/0/topic"
-        value: "tromsfylke-no.flyt.*"
+        value: "$KAFKA_TOPIC"
       - op: replace
         path: "/spec/orgId"
-        value: "tromsfylke.no"
+        value: "$ORG_ID"
       - op: replace
         path: "/spec/url/basePath"
-        value: "/tromsfylke-no"
+        value: "$URL_BASE_PATH"
       - op: replace
         path: "/spec/ingress/basePath"
-        value: "/tromsfylke-no/api/intern/integrasjoner"
+        value: "$INGRESS_BASE_PATH"
       - op: replace
         path: "/spec/env/1/value"
-        value: |
-          {
-            "tromsfylke.no":["USER"],
-            "vigo.no":["DEVELOPER","USER"],
-            "novari.no":["DEVELOPER","USER"]
-          }
+        value: |$ROLE_MAP
       - op: replace
         path: "/spec/env/4/value"
-        value: tromsfylke-no
+        value: $FINT_KAFKA_TOPIC_ORGIC
       - op: replace
         path: "/spec/probes/readiness/path"
-        value: "/tromsfylke-no/actuator/health"
+        value: "$READINESS_PATH"
       - op: replace
         path: "/spec/observability/metrics/path"
-        value: "/tromsfylke-no/actuator/prometheus"
+        value: "$METRICS_PATH"
 
     target:
       kind: Application

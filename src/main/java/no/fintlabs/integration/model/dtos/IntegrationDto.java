@@ -1,5 +1,6 @@
 package no.fintlabs.integration.model.dtos;
 
+import jakarta.validation.GroupSequence;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,8 +12,6 @@ import no.fintlabs.integration.validation.constraints.ReferencedConfigurationIsC
 import no.fintlabs.integration.validation.constraints.ReferencedConfigurationIsForIntegration;
 import no.fintlabs.integration.validation.groups.ActiveConfigurationIsCompleteGroup;
 import no.fintlabs.integration.validation.groups.ActiveConfigurationIsForIntegrationGroup;
-
-import javax.validation.GroupSequence;
 
 @GroupSequence({IntegrationDto.class, ActiveConfigurationIsForIntegrationGroup.class, ActiveConfigurationIsCompleteGroup.class})
 @Getter

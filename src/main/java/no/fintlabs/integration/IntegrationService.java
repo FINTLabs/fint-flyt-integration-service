@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class IntegrationService {
@@ -38,14 +38,14 @@ public class IntegrationService {
                 .map(integrationMappingService::toDto);
     }
 
-    public Collection<IntegrationDto> findAllBySourceApplicationIds(List<Long> sourceApplicationIds) {
+    public Collection<IntegrationDto> findAllBySourceApplicationIds(Set<Long> sourceApplicationIds) {
         return integrationMappingService.toDtos(
                 integrationRepository.findIntegrationsBySourceApplicationIdIn(sourceApplicationIds)
         );
     }
 
     public Page<IntegrationDto> findAllBySourceApplicationIds(
-            List<Long> sourceApplicationIds,
+            Set<Long> sourceApplicationIds,
             Pageable pageable
     ) {
         return integrationRepository.findIntegrationsBySourceApplicationIdIn(sourceApplicationIds, pageable)

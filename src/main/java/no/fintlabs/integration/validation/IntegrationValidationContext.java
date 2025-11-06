@@ -1,13 +1,11 @@
 package no.fintlabs.integration.validation;
 
+import jakarta.validation.Payload;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 import no.fintlabs.integration.model.dtos.ConfigurationDto;
-
-import javax.validation.Payload;
 
 @Getter
 @EqualsAndHashCode

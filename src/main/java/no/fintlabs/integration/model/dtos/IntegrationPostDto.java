@@ -1,11 +1,11 @@
 package no.fintlabs.integration.model.dtos;
 
-
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @EqualsAndHashCode
