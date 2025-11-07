@@ -29,7 +29,7 @@ patches:
         value: |$ROLE_MAP
       - op: replace
         path: "/spec/env/4/value"
-        value: $FINT_KAFKA_TOPIC_ORGIC
+        value: $FINT_KAFKA_TOPIC_ORGID
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "$READINESS_PATH"

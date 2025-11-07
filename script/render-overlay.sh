@@ -65,7 +65,7 @@ EOF
   export READINESS_PATH="$readiness_path"
   export METRICS_PATH="$metrics_path"
   export ROLE_MAP
-  export FINT_KAFKA_TOPIC_ORGIC="$namespace"
+  export FINT_KAFKA_TOPIC_ORGID="$namespace"
 
   tmp="$(mktemp)"
   envsubst < "$BASE_TEMPLATE" > "$tmp"
