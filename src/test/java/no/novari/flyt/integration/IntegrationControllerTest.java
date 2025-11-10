@@ -6,16 +6,15 @@ import no.novari.flyt.integration.model.dtos.IntegrationDto;
 import no.novari.flyt.integration.model.dtos.IntegrationPostDto;
 import no.novari.flyt.integration.model.entities.Integration;
 import no.novari.flyt.integration.validation.IntegrationValidatorFactory;
-import no.fintlabs.resourceserver.security.user.UserAuthorizationService;
-import org.junit.jupiter.api.BeforeEach;
+import no.novari.flyt.resourceserver.security.user.UserAuthorizationService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -35,6 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationControllerTest {
 
     @Mock
@@ -52,11 +52,6 @@ public class IntegrationControllerTest {
     @InjectMocks
     private IntegrationController controller;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     public void shouldReturnAllIntegrationsWithUserPermissionsDisabled() {
         when(integrationService.findAll()).thenReturn(Collections.emptyList());
@@ -70,8 +65,6 @@ public class IntegrationControllerTest {
 
     @Test
     public void shouldReturnSpecificIntegrationsBasedOnProvidedSourceApplicationIdWithUserPermissionsDisabled() {
-        when(integrationService.findAll()).thenReturn(Collections.emptyList());
-
         ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -82,12 +75,6 @@ public class IntegrationControllerTest {
     @Test
     public void shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() throws NoSuchFieldException, IllegalAccessException {
         setUserPermissionsConsumerEnabled();
-
-        Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaimAsString("sourceApplicationIds")).thenReturn("1,2");
-        when(authentication.getPrincipal()).thenReturn(jwt);
-
-//        List<Long> sourceApplicationIds = UserAuthorizationUtil.convertSourceApplicationIdsStringToList(authentication);
 
         Set<Long> authorizedSourceApplicationIds = Set.of(1L, 2L);
         when(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))

@@ -7,7 +7,7 @@ import no.novari.flyt.integration.model.dtos.IntegrationPatchDto;
 import no.novari.flyt.integration.model.dtos.IntegrationPostDto;
 import no.novari.flyt.integration.validation.IntegrationValidatorFactory;
 import no.novari.flyt.integration.validation.ValidationErrorsFormattingService;
-import no.fintlabs.resourceserver.security.user.UserAuthorizationService;
+import no.novari.flyt.resourceserver.security.user.UserAuthorizationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +30,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collection;
 import java.util.Set;
 
-import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
+import static no.novari.flyt.resourceserver.UrlPaths.INTERNAL_API;
+
 
 @RestController
 @RequestMapping(INTERNAL_API + "/integrasjoner")
