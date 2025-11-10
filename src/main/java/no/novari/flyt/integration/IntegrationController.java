@@ -42,7 +42,7 @@ public class IntegrationController {
     private final IntegrationValidatorFactory integrationValidatorFactory;
     private final ValidationErrorsFormattingService validationErrorsFormattingService;
     private final UserAuthorizationService userAuthorizationService;
-    @Value("${fint.flyt.resource-server.user-permissions-consumer.enabled:false}")
+    @Value("${novari.flyt.resource-server.user-permissions-consumer.enabled:false}")
     private boolean userPermissionsConsumerEnabled;
 
     public IntegrationController(
