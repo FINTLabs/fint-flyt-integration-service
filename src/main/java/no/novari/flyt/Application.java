@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {
-        "no.novari.flyt.integration",
+        "no.novari",
         "no.fintlabs"
 })
 public class Application {
