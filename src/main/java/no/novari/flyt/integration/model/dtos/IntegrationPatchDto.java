@@ -1,0 +1,35 @@
+package no.novari.flyt.integration.model.dtos;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import no.novari.flyt.integration.model.entities.Integration;
+
+import java.util.Optional;
+
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class IntegrationPatchDto {
+
+    private String destination;
+
+    private Integration.State state;
+
+    private Long activeConfigurationId;
+
+    public Optional<String> getDestination() {
+        return Optional.ofNullable(destination);
+    }
+
+    public Optional<Integration.State> getState() {
+        return Optional.ofNullable(state);
+    }
+
+    public Optional<Long> getActiveConfigurationId() {
+        return Optional.ofNullable(activeConfigurationId);
+    }
+
+}
