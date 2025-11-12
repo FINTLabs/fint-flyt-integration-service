@@ -70,7 +70,7 @@ Key properties:
 | Property                                                                | Description                                                                                 |
 |-------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `fint.application-id`                                                   | Default application ID used for Kafka client IDs and topic prefixes.                        |
-| `fint.kafka.topic.orgId`                                                | Overridden per kustomize overlay to scope Kafka ACLs and topic prefixes.                    |
+| `novari.kafka.topic.orgId`                                              | Overridden per kustomize overlay to scope Kafka ACLs and topic prefixes.                    |
 | `novari.flyt.resource-server.user-permissions-consumer.enabled`         | Toggles per-user source application filtering and authorization checks in the controller.  |
 | `fint.database.url`, `fint.database.username`, `fint.database.password` | PostgreSQL connection parameters supplied through secrets.                                  |
 | `spring.security.oauth2.resourceserver.jwt.issuer-uri`                  | Identity provider for JWT validation.                                                       |

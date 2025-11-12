@@ -1,15 +1,15 @@
 package no.novari.flyt.integration.kafka;
 
 import no.novari.flyt.integration.IntegrationService;
-import no.fintlabs.kafka.consuming.ErrorHandlerConfiguration;
-import no.fintlabs.kafka.consuming.ErrorHandlerFactory;
-import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
-import no.fintlabs.kafka.requestreply.RequestListenerConfiguration;
-import no.fintlabs.kafka.requestreply.RequestListenerContainerFactory;
-import no.fintlabs.kafka.requestreply.topic.RequestTopicService;
-import no.fintlabs.kafka.requestreply.topic.configuration.RequestTopicConfiguration;
-import no.fintlabs.kafka.requestreply.topic.name.RequestTopicNameParameters;
-import no.fintlabs.kafka.topic.name.TopicNamePrefixParameters;
+import no.novari.kafka.consuming.ErrorHandlerConfiguration;
+import no.novari.kafka.consuming.ErrorHandlerFactory;
+import no.novari.kafka.requestreply.ReplyProducerRecord;
+import no.novari.kafka.requestreply.RequestListenerConfiguration;
+import no.novari.kafka.requestreply.RequestListenerContainerFactory;
+import no.novari.kafka.requestreply.topic.RequestTopicService;
+import no.novari.kafka.requestreply.topic.configuration.RequestTopicConfiguration;
+import no.novari.kafka.requestreply.topic.name.RequestTopicNameParameters;
+import no.novari.kafka.topic.name.TopicNamePrefixParameters;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

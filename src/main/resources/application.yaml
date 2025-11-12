@@ -1,13 +1,10 @@
 fint:
   application-id: fint-flyt-integration-service
 
-  cache:
-    defaultCacheEntryTimeToLiveMillis: 518400000
-    defaultCacheHeapSize: 1000000
-
 server:
   error:
     include-message: always
+
 spring:
   jpa:
     properties:
