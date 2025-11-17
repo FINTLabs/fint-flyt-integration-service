@@ -1,6 +1,3 @@
-import org.gradle.api.tasks.testing.Test
-import org.gradle.jvm.tasks.Jar
-
 plugins {
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
@@ -47,8 +44,8 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("no.novari:kafka:5.0.0-rc-16")
-    implementation("no.novari:flyt-resource-server:6.0.0-rc-20")
+    implementation("no.novari:kafka:5.0.0-rc-18")
+    implementation("no.novari:flyt-resource-server:6.0.0-rc-22")
 
     implementation("org.hibernate.validator:hibernate-validator")
 
