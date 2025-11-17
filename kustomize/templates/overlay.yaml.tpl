@@ -27,9 +27,11 @@ patches:
       - op: replace
         path: "/spec/env/1/value"
         value: |$ROLE_MAP
-      - op: replace
-        path: "/spec/env/3/value"
-        value: $FINT_KAFKA_TOPIC_ORGID
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "novari.kafka.topic.orgId"
+         value: "$FINT_KAFKA_TOPIC_ORGID"
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "$READINESS_PATH"
