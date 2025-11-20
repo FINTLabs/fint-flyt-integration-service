@@ -30,24 +30,24 @@ while IFS= read -r file; do
   metrics_path="${base_path}/actuator/prometheus"
 
   role_map_json="$(cat <<EOF
-{
-  "$org_id":["USER"],
-  "vigo.no":["DEVELOPER","USER"],
-  "novari.no":["DEVELOPER","USER"]
-}
+  {
+    "$org_id":["USER"],
+    "vigo.no":["DEVELOPER","USER"],
+    "novari.no":["DEVELOPER","USER"]
+  }
 EOF
 )"
 
   case "$namespace" in
     afk-no|bfk-no|ofk-no)
       role_map_json="$(cat <<EOF
-{
-  "$org_id":["USER"],
-  "viken.no":["USER"],
-  "frid-iks.no":["USER"],
-  "vigo.no":["DEVELOPER","USER"],
-  "novari.no":["DEVELOPER","USER"]
-}
+  {
+    "$org_id":["USER"],
+    "viken.no":["USER"],
+    "frid-iks.no":["USER"],
+    "vigo.no":["DEVELOPER","USER"],
+    "novari.no":["DEVELOPER","USER"]
+  }
 EOF
 )"
       ;;
