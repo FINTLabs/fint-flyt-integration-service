@@ -20,7 +20,7 @@ import java.time.Duration;
 @Configuration
 public class ActiveConfigurationIdRequestConsumerConfiguration {
 
-    private static final Duration RETENTION_TIME = Duration.ofMinutes(5);
+    private static final Duration RETENTION_TIME = Duration.ofMinutes(10);
 
     @Bean
     public ConcurrentMessageListenerContainer<String, Long> activeConfigurationIdRequestConsumer(
