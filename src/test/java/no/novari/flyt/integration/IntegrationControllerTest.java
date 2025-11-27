@@ -17,22 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class IntegrationControllerTest {
@@ -53,29 +41,7 @@ public class IntegrationControllerTest {
     private IntegrationController controller;
 
     @Test
-    public void shouldReturnAllIntegrationsWithUserPermissionsDisabled() {
-        when(integrationService.findAll()).thenReturn(Collections.emptyList());
-
-        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, null);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(response.getBody()).size());
-        verify(integrationService).findAll();
-    }
-
-    @Test
-    public void shouldReturnSpecificIntegrationsBasedOnProvidedSourceApplicationIdWithUserPermissionsDisabled() {
-        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, 1L);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(response.getBody()).size());
-        verify(integrationService).findAllBySourceApplicationIds(Set.of(1L));
-    }
-
-    @Test
-    public void shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() throws NoSuchFieldException, IllegalAccessException {
-        setUserPermissionsConsumerEnabled();
-
+    public void shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() {
         Set<Long> authorizedSourceApplicationIds = Set.of(1L, 2L);
         when(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
                 .thenReturn(authorizedSourceApplicationIds);
@@ -159,12 +125,6 @@ public class IntegrationControllerTest {
         when(integrationValidatorFactory.getValidator()).thenThrow(ValidationException.class);
 
         assertThrows(ValidationException.class, () -> controller.postIntegration(authentication, postDto));
-    }
-
-    private void setUserPermissionsConsumerEnabled() throws NoSuchFieldException, IllegalAccessException {
-        java.lang.reflect.Field field = IntegrationController.class.getDeclaredField("userPermissionsConsumerEnabled");
-        field.setAccessible(true);
-        field.set(controller, true);
     }
 
 }
