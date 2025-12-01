@@ -43,7 +43,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     implementation("no.novari:kafka:5.0.0")
-    implementation("no.novari:flyt-resource-server:6.0.1-rc-1")
+    implementation("no.novari:flyt-resource-server:6.0.0")
 
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
