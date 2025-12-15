@@ -1,15 +1,21 @@
 fint:
   application-id: fint-flyt-integration-service
+
 server:
   error:
     include-message: always
+
 spring:
   jpa:
     properties:
       javax.persistence.validation.mode: none
+      jakarta.persistence.validation.mode: none
   profiles:
     include:
       - flyt-kafka
       - flyt-logging
       - flyt-postgres
       - flyt-resource-server
+  output:
+    ansi:
+      enabled: always

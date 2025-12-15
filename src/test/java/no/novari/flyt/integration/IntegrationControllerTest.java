@@ -1,0 +1,130 @@
+package no.novari.flyt.integration;
+
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import no.novari.flyt.integration.model.dtos.IntegrationDto;
+import no.novari.flyt.integration.model.dtos.IntegrationPostDto;
+import no.novari.flyt.integration.model.entities.Integration;
+import no.novari.flyt.integration.validation.IntegrationValidatorFactory;
+import no.novari.flyt.resourceserver.security.user.UserAuthorizationService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class IntegrationControllerTest {
+
+    @Mock
+    private IntegrationService integrationService;
+
+    @Mock
+    private IntegrationValidatorFactory integrationValidatorFactory;
+
+    @Mock
+    Authentication authentication;
+
+    @Mock
+    UserAuthorizationService userAuthorizationService;
+
+    @InjectMocks
+    private IntegrationController controller;
+
+    @Test
+    public void shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() {
+        Set<Long> authorizedSourceApplicationIds = Set.of(1L, 2L);
+        when(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
+                .thenReturn(authorizedSourceApplicationIds);
+
+        IntegrationDto integration1 = IntegrationDto.builder()
+                .id(1L)
+                .sourceApplicationId(1L)
+                .destination("Destination 1")
+                .state(Integration.State.ACTIVE)
+                .build();
+
+        IntegrationDto integration2 = IntegrationDto.builder()
+                .id(2L)
+                .sourceApplicationId(2L)
+                .destination("Destination 2")
+                .state(Integration.State.DEACTIVATED)
+                .build();
+
+        List<IntegrationDto> expectedIntegrations = Arrays.asList(integration1, integration2);
+
+        when(integrationService.findAllBySourceApplicationIds(authorizedSourceApplicationIds))
+                .thenReturn(expectedIntegrations);
+
+        ResponseEntity<Collection<IntegrationDto>> response = controller.getIntegrations(authentication, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        assertTrue(response.getBody().contains(integration1));
+        assertTrue(response.getBody().contains(integration2));
+
+        verify(integrationService).findAllBySourceApplicationIds(authorizedSourceApplicationIds);
+        verify(integrationService, never()).findAll();
+    }
+
+
+    @Test
+    void testGetIntegrationFound() {
+        IntegrationDto mockDto = IntegrationDto.builder().id(1L).destination("destination").build();
+        when(integrationService.findById(1L)).thenReturn(Optional.of(mockDto));
+
+        ResponseEntity<IntegrationDto> response = controller.getIntegration(authentication, 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockDto, response.getBody());
+
+        verify(integrationService).findById(1L);
+    }
+
+    @Test
+    void testGetIntegrationNotFound() {
+        when(integrationService.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> controller.getIntegration(authentication, 1L));
+
+        verify(integrationService).findById(1L);
+    }
+
+    @Test
+    void testPostIntegration() {
+
+        Validator mockValidator = mock(Validator.class);
+        when(integrationValidatorFactory.getValidator()).thenReturn(mockValidator);
+
+        IntegrationPostDto postDto = IntegrationPostDto.builder().build();
+        IntegrationDto mockDto = IntegrationDto.builder().id(1L).destination("destination").build();
+
+        when(integrationService.save(postDto)).thenReturn(mockDto);
+
+        ResponseEntity<IntegrationDto> response = controller.postIntegration(authentication, postDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockDto, response.getBody());
+
+        verify(integrationService).save(postDto);
+    }
+
+    @Test
+    void testPostIntegrationWithValidationFailure() {
+        IntegrationPostDto postDto = IntegrationPostDto.builder().build();
+        when(integrationValidatorFactory.getValidator()).thenThrow(ValidationException.class);
+
+        assertThrows(ValidationException.class, () -> controller.postIntegration(authentication, postDto));
+    }
+
+}
