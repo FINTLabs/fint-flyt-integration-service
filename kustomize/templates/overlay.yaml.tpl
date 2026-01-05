@@ -35,8 +35,14 @@ patches:
          name: "novari.kafka.topic.orgId"
          value: "$FINT_KAFKA_TOPIC_ORGID"
       - op: replace
+        path: "/spec/probes/startup/path"
+        value: "$STARTUP_PATH"
+      - op: replace
         path: "/spec/probes/readiness/path"
         value: "$READINESS_PATH"
+      - op: replace
+        path: "/spec/probes/liveness/path"
+        value: "$LIVENESS_PATH"
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "$METRICS_PATH"

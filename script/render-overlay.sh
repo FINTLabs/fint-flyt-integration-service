@@ -26,7 +26,9 @@ while IFS= read -r file; do
 
   base_path="/${path_prefix}${namespace}"
   ingress_base_path="${base_path}/api/intern/integrasjoner"
-  readiness_path="${base_path}/actuator/health"
+  startup_path="${base_path}/actuator/health"
+  readiness_path="${base_path}/actuator/health/readiness"
+  liveness_path="${base_path}/actuator/health/liveness"
   metrics_path="${base_path}/actuator/prometheus"
 
   role_map_json="$(cat <<EOF
@@ -62,7 +64,9 @@ EOF
   export KAFKA_TOPIC="$kafka_topic"
   export URL_BASE_PATH="$base_path"
   export INGRESS_BASE_PATH="$ingress_base_path"
+  export STARTUP_PATH="$startup_path"
   export READINESS_PATH="$readiness_path"
+  export LIVENESS_PATH="$liveness_path"
   export METRICS_PATH="$metrics_path"
   export ROLE_MAP
   export FINT_KAFKA_TOPIC_ORGID="$namespace"
