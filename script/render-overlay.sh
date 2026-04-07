@@ -63,6 +63,7 @@ EOF
   export APP_INSTANCE="$app_instance"
   export KAFKA_TOPIC="$kafka_topic"
   export URL_BASE_PATH="$base_path"
+  export SERVLET_CONTEXT_PATH="$base_path"
   export INGRESS_BASE_PATH="$ingress_base_path"
   export STARTUP_PATH="$startup_path"
   export READINESS_PATH="$readiness_path"

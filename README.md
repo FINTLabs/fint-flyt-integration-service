@@ -4,7 +4,7 @@ Spring Boot service that maintains integration definitions for FINT Flyt tenants
 
 ## Highlights
 
-- **RESTful integration registry** — Spring WebFlux controller for listing, fetching, creating, and patching integrations under `/internal/api/integrasjoner`.
+- **RESTful integration registry** — Spring MVC controller for listing, fetching, creating, and patching integrations under `/api/intern/integrasjoner`.
 - **PostgreSQL persistence** — JPA-backed repository with Flyway migrations ensuring a unique key per source application integration.
 - **Kafka request/reply bridges** — Consumers and producers that expose integration lookups and configuration fetches over namespaced request topics.
 - **Context-aware validation** — Custom Jakarta Bean Validation constraints that query configuration state before accepting active configuration changes.
@@ -12,28 +12,28 @@ Spring Boot service that maintains integration definitions for FINT Flyt tenants
 
 ## Architecture Overview
 
-| Component                                      | Responsibility                                                                                                 |
-|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| `IntegrationController`                        | Handles internal HTTP requests, enforces authorization rules, and orchestrates validation.                    |
-| `IntegrationService`                           | Coordinates repository access, DTO mapping, and business rules for CRUD operations.                           |
-| `IntegrationRepository`                        | Spring Data JPA repository storing integrations in PostgreSQL with uniqueness constraints.                    |
-| `IntegrationMappingService`                    | Maps between JPA entities and API DTOs to keep persistence separate from transport concerns.                  |
-| `IntegrationValidatorFactory` & constraints    | Builds validators with contextual payload so active configuration IDs are verified before persist.            |
-| `ConfigurationRequestProducerService`          | Issues Kafka request/reply calls to fetch configuration snapshots used during validation.                     |
-| `IntegrationRequestConsumerConfiguration`      | Exposes Kafka listeners that answer integration lookup requests by ID or by (sourceApp, integrationId) tuple. |
-| `ActiveConfigurationIdRequestConsumerConfiguration` | Serves active configuration IDs over Kafka topics so dependent services can resolve them dynamically.       |
+| Component                                           | Responsibility                                                                                                |
+|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `IntegrationController`                             | Handles internal HTTP requests, enforces authorization rules, and orchestrates validation.                    |
+| `IntegrationService`                                | Coordinates repository access, DTO mapping, and business rules for CRUD operations.                           |
+| `IntegrationRepository`                             | Spring Data JPA repository storing integrations in PostgreSQL with uniqueness constraints.                    |
+| `IntegrationMappingService`                         | Maps between JPA entities and API DTOs to keep persistence separate from transport concerns.                  |
+| `IntegrationValidatorFactory` & constraints         | Builds validators with contextual payload so active configuration IDs are verified before persist.            |
+| `ConfigurationRequestProducerService`               | Issues Kafka request/reply calls to fetch configuration snapshots used during validation.                     |
+| `IntegrationRequestConsumerConfiguration`           | Exposes Kafka listeners that answer integration lookup requests by ID or by (sourceApp, integrationId) tuple. |
+| `ActiveConfigurationIdRequestConsumerConfiguration` | Serves active configuration IDs over Kafka topics so dependent services can resolve them dynamically.         |
 
 ## HTTP API
 
-Base path: `/internal/api/integrasjoner`
+Base path: `/api/intern/integrasjoner`
 
-| Method | Path                          | Description                                                                                         | Request body                              | Response                                                     |
-|--------|-------------------------------|-----------------------------------------------------------------------------------------------------|-------------------------------------------|--------------------------------------------------------------|
-| `GET`  | `/`                           | List integrations. Optional `sourceApplicationId` filters the result.                               | –                                         | `200 OK` with `IntegrationDto[]`.                            |
-| `GET`  | `/?side&antall&sorteringFelt&sorteringRetning` | Paged listing with Spring Data pagination parameters and optional `sourceApplicationId` filter. | –                                         | `200 OK` with a `Page<IntegrationDto>` payload.              |
-| `GET`  | `/{integrationId}`            | Fetch a single integration by ID. Authorization rules verified when permission consumer is enabled. | –                                         | `200 OK` with an `IntegrationDto`, `404` when not found.     |
-| `POST` | `/`                           | Create a new integration. Rejects duplicates per source application integration ID.                 | `IntegrationPostDto` JSON (see below).    | `200 OK` with the created `IntegrationDto`. `409` on clash.  |
-| `PATCH`| `/{integrationId}`            | Apply partial updates to destination, state, or active configuration.                               | `IntegrationPatchDto` JSON.               | `200 OK` with the updated `IntegrationDto`, `422` on invalid changes. |
+| Method  | Path                                           | Description                                                                                         | Request body                           | Response                                                              |
+|---------|------------------------------------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------|-----------------------------------------------------------------------|
+| `GET`   | `/`                                            | List integrations. Optional `sourceApplicationId` filters the result.                               | –                                      | `200 OK` with `IntegrationDto[]`.                                     |
+| `GET`   | `/?side&antall&sorteringFelt&sorteringRetning` | Paged listing with Spring Data pagination parameters and optional `sourceApplicationId` filter.     | –                                      | `200 OK` with a `Page<IntegrationDto>` payload.                       |
+| `GET`   | `/{integrationId}`                             | Fetch a single integration by ID. Authorization rules verified when permission consumer is enabled. | –                                      | `200 OK` with an `IntegrationDto`, `404` when not found.              |
+| `POST`  | `/`                                            | Create a new integration. Rejects duplicates per source application integration ID.                 | `IntegrationPostDto` JSON (see below). | `200 OK` with the created `IntegrationDto`. `409` on clash.           |
+| `PATCH` | `/{integrationId}`                             | Apply partial updates to destination, state, or active configuration.                               | `IntegrationPatchDto` JSON.            | `200 OK` with the updated `IntegrationDto`, `422` on invalid changes. |
 
 Example `IntegrationPostDto` payload:
 
@@ -63,7 +63,7 @@ The service does not define scheduled jobs; configuration validation happens inl
 
 ## Configuration
 
-Spring profiles layer common Flyt settings: `flyt-kafka`, `flyt-logging`, `flyt-postgres`, and `flyt-resource-server`.
+Spring profiles layer common Flyt settings: `flyt-kafka`, `flyt-logging`, `flyt-postgres`, and `flyt-web-resource-server`.
 
 Key properties:
 
@@ -81,7 +81,7 @@ Secrets referenced by the base manifest must provide database credentials and OA
 
 Prerequisites:
 
-- Java 21+
+- Java 25+
 - Dockerized or local PostgreSQL instance
 - Kafka broker (local or containerized)
 
@@ -91,16 +91,27 @@ Useful commands:
 ./gradlew clean build     # compile sources and run tests
 ./gradlew test            # unit test suite
 ./gradlew bootRun         # start the application with Flyt profiles
+docker compose up -d      # start PostgreSQL and Kafka locally
+docker compose --profile app up --build # start app, PostgreSQL, and Kafka in containers
 ```
 
 Use `SPRING_PROFILES_ACTIVE=local-staging` to apply the local overrides in `application-local-staging.yaml`. Provide a PostgreSQL instance (defaults to `jdbc:postgresql://localhost:5438/fint-flyt-integration-service`) and a Kafka broker on `localhost:9092`.
+
+For local development from IntelliJ or `bootRun`, `docker compose up -d` starts:
+
+- PostgreSQL on `localhost:5438`
+- Apache Kafka `3.8.1` on `localhost:9092`
+
+If you also want the application in Docker, use `docker compose --profile app up --build`. Then the app is exposed on `http://localhost:8090`.
+
+The compose setup creates the `fintlabs_no` schema automatically so the `local-staging` profile works unchanged. Wait until PostgreSQL is healthy before starting the app locally.
 
 ## Deployment
 
 Kustomize structure:
 
 - `kustomize/base/` holds the shared Application manifest, database/env wiring, and Actuator configuration.
-- `kustomize/overlays/<org>/<env>/` includes tenant-specific patches (namespace, labels, Kafka topics, and URL paths).
+- `kustomize/overlays/<org>/<env>/` includes tenant-specific patches (namespace, labels, Kafka topics, and servlet context paths).
 
 Templates live under `kustomize/templates/`:
 
@@ -117,13 +128,13 @@ The script iterates over existing overlays, substitutes organization-specific va
 ## Security
 
 - OAuth2 resource server with JWT validation against `https://idp.felleskomponent.no`.
-- Internal API is gated by `novari.flyt.resource-server.security.api.internal` settings; optional user-permissions consumer restricts visibility to authorized source applications.
+- Internal API is gated by `novari.flyt.web-resource-server.security.api.internal` settings; optional user-permissions consumer restricts visibility to authorized source applications.
 
 ## Observability & Operations
 
 - Readiness probe at `/actuator/health`.
 - Prometheus metrics exposed at `/actuator/prometheus`.
-- Structured logging leverages standard Spring Boot and Reactor logging context.
+- Structured logging leverages standard Spring Boot logging context.
 
 ## Development Tips
 
@@ -141,4 +152,3 @@ The script iterates over existing overlays, substitutes organization-specific va
 ———
 
 FINT Flyt Integration Service is maintained by the FINT Flyt team. Reach out on the internal Slack channel or file an issue in this repository for questions or enhancement ideas.
-
