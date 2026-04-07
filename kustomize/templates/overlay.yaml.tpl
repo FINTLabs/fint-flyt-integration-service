@@ -19,21 +19,23 @@ patches:
         path: "/spec/orgId"
         value: "$ORG_ID"
       - op: replace
-        path: "/spec/url/basePath"
-        value: "$URL_BASE_PATH"
-      - op: replace
         path: "/spec/ingress/basePath"
         value: "$INGRESS_BASE_PATH"
       - op: add
         path: "/spec/env/-"
         value:
-          name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
+          name: "novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json"
           value: |$ROLE_MAP
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "$FINT_KAFKA_TOPIC_ORGID"
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "server.servlet.context-path"
+         value: "$SERVLET_CONTEXT_PATH"
       - op: replace
         path: "/spec/probes/startup/path"
         value: "$STARTUP_PATH"
