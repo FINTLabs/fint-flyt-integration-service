@@ -2,6 +2,7 @@ package no.novari.flyt.integration.api
 
 import jakarta.validation.Valid
 import no.novari.flyt.integration.api.dto.IntegrationDto
+import no.novari.flyt.integration.api.dto.IntegrationPageResponse
 import no.novari.flyt.integration.api.dto.IntegrationPatchDto
 import no.novari.flyt.integration.api.dto.IntegrationPostDto
 import no.novari.flyt.integration.application.IntegrationService
@@ -11,9 +12,7 @@ import no.novari.flyt.integration.web.ForbiddenWithoutBodyException
 import no.novari.flyt.integration.web.NotFoundException
 import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_API
 import no.novari.flyt.webresourceserver.security.user.UserAuthorizationService
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,20 +36,27 @@ class IntegrationController(
         authentication: Authentication,
         @RequestParam(required = false) sourceApplicationId: Long?,
     ): Collection<IntegrationDto> {
-        return listAuthorizedIntegrations(authentication, sourceApplicationId)
+        val sourceApplicationIds = resolveAuthorizedSourceApplicationIds(authentication, sourceApplicationId)
+        return integrationService.findAllBySourceApplicationIds(sourceApplicationIds)
     }
 
     @GetMapping(params = ["side", "antall", "sorteringFelt", "sorteringRetning"])
-    fun listIntegrationsPage(
+    fun listIntegrationsPaginated(
         authentication: Authentication,
         @RequestParam(name = "side") page: Int,
         @RequestParam(name = "antall") size: Int,
         @RequestParam(name = "sorteringFelt") sortProperty: String,
         @RequestParam(name = "sorteringRetning") sortDirection: Sort.Direction,
         @RequestParam(required = false) sourceApplicationId: Long?,
-    ): Page<IntegrationDto> {
+    ): IntegrationPageResponse {
+        val sourceApplicationIds = resolveAuthorizedSourceApplicationIds(authentication, sourceApplicationId)
         val pageRequest = PageRequest.of(page, size).withSort(sortDirection, sortProperty)
-        return listAuthorizedIntegrationsPage(authentication, pageRequest, sourceApplicationId)
+        val integrations = integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageRequest)
+        return IntegrationPageResponse(
+            content = integrations.content,
+            totalElements = integrations.totalElements,
+            totalPages = integrations.totalPages,
+        )
     }
 
     @GetMapping("{integrationId}")
@@ -113,41 +119,22 @@ class IntegrationController(
         return integrationService.updateById(integrationId, integrationPatchDto)
     }
 
-    private fun listAuthorizedIntegrations(
+    private fun resolveAuthorizedSourceApplicationIds(
         authentication: Authentication,
         sourceApplicationId: Long?,
-    ): Collection<IntegrationDto> {
-        val sourceApplicationIds =
+    ): Set<Long> {
+        val authorizedSourceApplicationIds =
             userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication)
 
-        if (sourceApplicationId != null) {
-            if (!sourceApplicationIds.contains(sourceApplicationId)) {
-                throw ForbiddenWithoutBodyException()
-            }
-
-            return integrationService.findAllBySourceApplicationIds(setOf(sourceApplicationId))
+        if (sourceApplicationId == null) {
+            return authorizedSourceApplicationIds
         }
 
-        return integrationService.findAllBySourceApplicationIds(sourceApplicationIds)
-    }
-
-    private fun listAuthorizedIntegrationsPage(
-        authentication: Authentication,
-        pageable: Pageable,
-        sourceApplicationId: Long?,
-    ): Page<IntegrationDto> {
-        val sourceApplicationIds =
-            userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication)
-
-        if (sourceApplicationId != null) {
-            if (!sourceApplicationIds.contains(sourceApplicationId)) {
-                throw ForbiddenWithoutBodyException()
-            }
-
-            return integrationService.findAllBySourceApplicationIds(setOf(sourceApplicationId), pageable)
+        if (!authorizedSourceApplicationIds.contains(sourceApplicationId)) {
+            throw ForbiddenWithoutBodyException()
         }
 
-        return integrationService.findAllBySourceApplicationIds(sourceApplicationIds, pageable)
+        return setOf(sourceApplicationId)
     }
 
     private fun ensureIntegrationDoesNotAlreadyExist(integrationPostDto: IntegrationPostDto) {

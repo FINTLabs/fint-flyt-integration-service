@@ -18,9 +18,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.security.core.Authentication
 
 @ExtendWith(MockitoExtension::class)
@@ -81,6 +86,39 @@ class IntegrationControllerTest {
         assertTrue(response.containsAll(expectedIntegrations))
         verify(integrationService).findAllBySourceApplicationIds(authorizedSourceApplicationIds)
         verify(integrationService, never()).findAll()
+    }
+
+    @Test
+    fun shouldReturnPaginatedIntegrationsWithTotals() {
+        val authorizedSourceApplicationIds = setOf(1L, 2L)
+        val integration =
+            IntegrationDto(
+                id = 1L,
+                sourceApplicationId = 1L,
+                sourceApplicationIntegrationId = "integration-1",
+                destination = "Destination 1",
+                state = Integration.State.ACTIVE,
+            )
+        val page = PageImpl(listOf(integration), PageRequest.of(0, 10), 1)
+
+        whenever(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
+            .thenReturn(authorizedSourceApplicationIds)
+        whenever(integrationService.findAllBySourceApplicationIds(eq(authorizedSourceApplicationIds), any()))
+            .thenReturn(page)
+
+        val response =
+            controller.listIntegrationsPaginated(
+                authentication = authentication,
+                page = 0,
+                size = 10,
+                sortProperty = "id",
+                sortDirection = Sort.Direction.ASC,
+                sourceApplicationId = null,
+            )
+
+        assertEquals(listOf(integration), response.content)
+        assertEquals(1L, response.totalElements)
+        assertEquals(1, response.totalPages)
     }
 
     @Test
