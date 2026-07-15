@@ -15,6 +15,7 @@ spring:
       - flyt-kafka
       - flyt-logging
       - flyt-postgres
+      - flyt-authorization-client
       - flyt-web-resource-server
   output:
     ansi:

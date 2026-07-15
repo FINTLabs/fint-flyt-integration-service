@@ -56,6 +56,7 @@ class IntegrationControllerTest {
 
     @Test
     fun shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() {
+        val candidateSourceApplicationIds = setOf(1L, 2L, 3L)
         val authorizedSourceApplicationIds = setOf(1L, 2L)
         val expectedIntegrations =
             listOf(
@@ -75,8 +76,13 @@ class IntegrationControllerTest {
                 ),
             )
 
-        whenever(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
-            .thenReturn(authorizedSourceApplicationIds)
+        whenever(integrationService.findDistinctSourceApplicationIds()).thenReturn(candidateSourceApplicationIds)
+        whenever(
+            userAuthorizationService.getUserAuthorizedSourceApplicationIds(
+                authentication,
+                candidateSourceApplicationIds,
+            ),
+        ).thenReturn(authorizedSourceApplicationIds)
         whenever(integrationService.findAllBySourceApplicationIds(authorizedSourceApplicationIds))
             .thenReturn(expectedIntegrations)
 
@@ -84,12 +90,18 @@ class IntegrationControllerTest {
 
         assertEquals(expectedIntegrations.size, response.size)
         assertTrue(response.containsAll(expectedIntegrations))
+        verify(integrationService).findDistinctSourceApplicationIds()
+        verify(userAuthorizationService).getUserAuthorizedSourceApplicationIds(
+            authentication,
+            candidateSourceApplicationIds,
+        )
         verify(integrationService).findAllBySourceApplicationIds(authorizedSourceApplicationIds)
         verify(integrationService, never()).findAll()
     }
 
     @Test
     fun shouldReturnPaginatedIntegrationsWithTotals() {
+        val candidateSourceApplicationIds = setOf(1L, 2L, 3L)
         val authorizedSourceApplicationIds = setOf(1L, 2L)
         val integration =
             IntegrationDto(
@@ -101,8 +113,13 @@ class IntegrationControllerTest {
             )
         val page = PageImpl(listOf(integration), PageRequest.of(0, 10), 1)
 
-        whenever(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
-            .thenReturn(authorizedSourceApplicationIds)
+        whenever(integrationService.findDistinctSourceApplicationIds()).thenReturn(candidateSourceApplicationIds)
+        whenever(
+            userAuthorizationService.getUserAuthorizedSourceApplicationIds(
+                authentication,
+                candidateSourceApplicationIds,
+            ),
+        ).thenReturn(authorizedSourceApplicationIds)
         whenever(integrationService.findAllBySourceApplicationIds(eq(authorizedSourceApplicationIds), any()))
             .thenReturn(page)
 
@@ -154,7 +171,7 @@ class IntegrationControllerTest {
 
     @Test
     fun shouldThrowForbiddenWithoutBodyWhenFilteringByUnauthorizedSourceApplicationId() {
-        whenever(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
+        whenever(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication, setOf(3L)))
             .thenReturn(setOf(1L, 2L))
 
         assertThrows(ForbiddenWithoutBodyException::class.java) {

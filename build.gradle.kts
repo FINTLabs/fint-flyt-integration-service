@@ -39,7 +39,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("no.novari:flyt-web-resource-server:3.2.0")
+    implementation("no.novari:flyt-web-resource-server:4.0.0-rc-1")
 
     compileOnly("org.springframework.security:spring-security-config")
     compileOnly("org.springframework.security:spring-security-web")
