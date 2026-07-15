@@ -31,7 +31,7 @@ Base path: `/api/intern/integrasjoner`
 |---------|------------------------------------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------|-----------------------------------------------------------------------|
 | `GET`   | `/`                                            | List integrations. Optional `sourceApplicationId` filters the result.                               | –                                      | `200 OK` with `IntegrationDto[]`.                                     |
 | `GET`   | `/?side&antall&sorteringFelt&sorteringRetning` | Paged listing with Spring Data pagination parameters and optional `sourceApplicationId` filter.     | –                                      | `200 OK` with a `Page<IntegrationDto>` payload.                       |
-| `GET`   | `/{integrationId}`                             | Fetch a single integration by ID. Authorization rules verified when permission consumer is enabled. | –                                      | `200 OK` with an `IntegrationDto`, `404` when not found.              |
+| `GET`   | `/{integrationId}`                             | Fetch a single integration by ID after an authorization-service access check. | –                                      | `200 OK` with an `IntegrationDto`, `404` when not found.              |
 | `POST`  | `/`                                            | Create a new integration. Rejects duplicates per source application integration ID.                 | `IntegrationPostDto` JSON (see below). | `200 OK` with the created `IntegrationDto`. `409` on clash.           |
 | `PATCH` | `/{integrationId}`                             | Apply partial updates to destination, state, or active configuration.                               | `IntegrationPatchDto` JSON.            | `200 OK` with the updated `IntegrationDto`, `422` on invalid changes. |
 
@@ -45,7 +45,7 @@ Example `IntegrationPostDto` payload:
 }
 ```
 
-Validation failures yield `422 Unprocessable Entity` with aggregated error messages. When user-permission checks are active, access to non-authorized source applications returns `403 Forbidden`.
+Validation failures yield `422 Unprocessable Entity` with aggregated error messages. Access to non-authorized source applications returns `403 Forbidden`.
 
 ## Kafka Integration
 
@@ -63,7 +63,8 @@ The service does not define scheduled jobs; configuration validation happens inl
 
 ## Configuration
 
-Spring profiles layer common Flyt settings: `flyt-kafka`, `flyt-logging`, `flyt-postgres`, and `flyt-web-resource-server`.
+Spring profiles layer common Flyt settings: `flyt-kafka`, `flyt-logging`, `flyt-postgres`,
+`flyt-web-resource-server`, and `flyt-authorization-client`.
 
 Key properties:
 
@@ -128,7 +129,7 @@ The script iterates over existing overlays, substitutes organization-specific va
 ## Security
 
 - OAuth2 resource server with JWT validation against `https://idp.felleskomponent.no`.
-- Internal API is gated by `novari.flyt.web-resource-server.security.api.internal` settings; optional user-permissions consumer restricts visibility to authorized source applications.
+- Internal API is gated by `novari.flyt.web-resource-server.security.api.internal` settings. List endpoints first read distinct source-application candidates from the database, authorize them in one OAuth2-protected HTTP request, then load data only for permitted IDs.
 
 ## Observability & Operations
 

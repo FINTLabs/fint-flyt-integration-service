@@ -123,18 +123,19 @@ class IntegrationController(
         authentication: Authentication,
         sourceApplicationId: Long?,
     ): Set<Long> {
+        val candidateSourceApplicationIds =
+            sourceApplicationId?.let(::setOf) ?: integrationService.findDistinctSourceApplicationIds()
         val authorizedSourceApplicationIds =
-            userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication)
+            userAuthorizationService.getUserAuthorizedSourceApplicationIds(
+                authentication,
+                candidateSourceApplicationIds,
+            )
 
-        if (sourceApplicationId == null) {
-            return authorizedSourceApplicationIds
-        }
-
-        if (!authorizedSourceApplicationIds.contains(sourceApplicationId)) {
+        if (sourceApplicationId != null && !authorizedSourceApplicationIds.contains(sourceApplicationId)) {
             throw ForbiddenWithoutBodyException()
         }
 
-        return setOf(sourceApplicationId)
+        return authorizedSourceApplicationIds
     }
 
     private fun ensureIntegrationDoesNotAlreadyExist(integrationPostDto: IntegrationPostDto) {
