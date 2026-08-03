@@ -21,14 +21,14 @@ class ReferencedConfigurationIsForIntegrationValidatorTest {
     }
 
     @Test
-    fun shouldReturnTrueForNullValue() {
+    fun `returns true for null value`() {
         val result = validator.isValid(null, createMockContext())
 
         assertTrue(result)
     }
 
     @Test
-    fun shouldReturnTrueWhenConfigurationBelongsToIntegration() {
+    fun `returns true when configuration belongs to integration`() {
         whenever(validationContext.integrationId).thenReturn(12345L)
         whenever(validationContext.configuration).thenReturn(ConfigurationDto(integrationId = 12345L))
 
@@ -38,7 +38,7 @@ class ReferencedConfigurationIsForIntegrationValidatorTest {
     }
 
     @Test
-    fun shouldReturnFalseWhenConfigurationBelongsToAnotherIntegration() {
+    fun `returns false when configuration belongs to another integration`() {
         whenever(validationContext.integrationId).thenReturn(12345L)
         whenever(validationContext.configuration).thenReturn(ConfigurationDto(integrationId = 67890L))
 

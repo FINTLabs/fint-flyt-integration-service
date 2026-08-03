@@ -55,7 +55,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldReturnSpecificIntegrationsWithUserPermissionsEnabled() {
+    fun `returns integrations for user's authorized source applications`() {
         val authorizedSourceApplicationIds = setOf(1L, 2L)
         val expectedIntegrations =
             listOf(
@@ -89,7 +89,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldReturnPaginatedIntegrationsWithTotals() {
+    fun `returns paginated integrations with totals`() {
         val authorizedSourceApplicationIds = setOf(1L, 2L)
         val integration =
             IntegrationDto(
@@ -122,7 +122,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldReturnIntegrationWhenFound() {
+    fun `returns integration when found`() {
         val integration =
             IntegrationDto(
                 id = 1L,
@@ -141,7 +141,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldThrowWhenIntegrationIsMissing() {
+    fun `throws not found when integration is missing`() {
         whenever(integrationService.findById(1L)).thenReturn(null)
 
         val exception =
@@ -153,7 +153,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldThrowForbiddenWithoutBodyWhenFilteringByUnauthorizedSourceApplicationId() {
+    fun `throws forbidden without body when filtering by unauthorized source application id`() {
         whenever(userAuthorizationService.getUserAuthorizedSourceApplicationIds(authentication))
             .thenReturn(setOf(1L, 2L))
 
@@ -163,7 +163,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldPostIntegrationWhenValid() {
+    fun `creates integration when valid`() {
         val postDto = IntegrationPostDto(1L, "integration-1", "destination")
         val savedIntegration =
             IntegrationDto(
@@ -189,7 +189,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldReturnConflictWhenPostingDuplicateIntegration() {
+    fun `throws conflict when posting duplicate integration`() {
         val postDto = IntegrationPostDto(1L, "integration-1", "destination")
 
         whenever(
@@ -208,7 +208,7 @@ class IntegrationControllerTest {
     }
 
     @Test
-    fun shouldDelegatePatchValidationToUpdateValidationService() {
+    fun `delegates patch validation to update validation service`() {
         val existingIntegration =
             IntegrationDto(
                 id = 1L,

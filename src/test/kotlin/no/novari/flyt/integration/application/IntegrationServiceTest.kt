@@ -1,5 +1,6 @@
 package no.novari.flyt.integration.application
 
+import no.novari.flyt.audit.actor.ActorDisplayResolver
 import no.novari.flyt.integration.api.dto.IntegrationPatchDto
 import no.novari.flyt.integration.api.dto.IntegrationPostDto
 import no.novari.flyt.integration.persistence.IntegrationRepository
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
@@ -29,11 +31,12 @@ class IntegrationServiceTest {
 
     @BeforeEach
     fun setUp() {
-        integrationService = IntegrationService(integrationRepository, IntegrationMappingService())
+        val actorDisplayResolver: ActorDisplayResolver = mock()
+        integrationService = IntegrationService(integrationRepository, IntegrationMappingService(actorDisplayResolver))
     }
 
     @Test
-    fun shouldFindAllIntegrations() {
+    fun `finds all integrations`() {
         val integrations =
             listOf(
                 Integration(
@@ -53,7 +56,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldFindAllWithPageable() {
+    fun `finds all integrations with pageable`() {
         val integrations =
             PageImpl(
                 listOf(
@@ -75,7 +78,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldCheckIfIntegrationExistsById() {
+    fun `checks if integration exists by id`() {
         whenever(integrationRepository.existsById(1L)).thenReturn(true)
 
         val result = integrationService.existsById(1L)
@@ -84,7 +87,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldFindIntegrationById() {
+    fun `finds integration by id`() {
         val integration =
             Integration(
                 id = 1L,
@@ -102,7 +105,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldReturnNullWhenIntegrationByIdIsMissing() {
+    fun `returns null when integration by id is missing`() {
         whenever(integrationRepository.findById(1L)).thenReturn(Optional.empty())
 
         val result = integrationService.findById(1L)
@@ -111,7 +114,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldFindIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId() {
+    fun `finds integration by source application id and source application integration id`() {
         val integration =
             Integration(
                 id = 1L,
@@ -138,7 +141,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldCheckIfIntegrationExistsBySourceApplicationAndIntegrationId() {
+    fun `checks if integration exists by source application and integration id`() {
         whenever(
             integrationRepository.existsIntegrationBySourceApplicationIdAndSourceApplicationIntegrationId(
                 1L,
@@ -156,7 +159,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldFindActiveConfigurationIdByIntegrationId() {
+    fun `finds active configuration id by integration id`() {
         val integration = Integration(activeConfigurationId = 1L)
         whenever(integrationRepository.findById(1L)).thenReturn(Optional.of(integration))
 
@@ -166,7 +169,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldSaveIntegration() {
+    fun `saves integration`() {
         val integrationPostDto = IntegrationPostDto(1L, "integration-1", "destination")
         val integration =
             Integration(
@@ -185,7 +188,7 @@ class IntegrationServiceTest {
     }
 
     @Test
-    fun shouldUpdateIntegrationById() {
+    fun `updates integration by id`() {
         val integration =
             Integration(
                 id = 1L,
