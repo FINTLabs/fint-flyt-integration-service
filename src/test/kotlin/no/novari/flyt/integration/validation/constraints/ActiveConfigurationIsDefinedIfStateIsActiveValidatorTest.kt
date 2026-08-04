@@ -24,7 +24,7 @@ class ActiveConfigurationIsDefinedIfStateIsActiveValidatorTest {
     }
 
     @Test
-    fun shouldReturnTrueWhenStateIsNotActive() {
+    fun `returns true when state is not active`() {
         whenever(context.getConstraintValidatorPayload(IntegrationValidationContext::class.java))
             .thenReturn(validationContext)
 
@@ -34,7 +34,7 @@ class ActiveConfigurationIsDefinedIfStateIsActiveValidatorTest {
     }
 
     @Test
-    fun shouldReturnTrueWhenStateIsActiveAndConfigurationIsPresent() {
+    fun `returns true when state is active and configuration is present`() {
         whenever(context.getConstraintValidatorPayload(IntegrationValidationContext::class.java))
             .thenReturn(validationContext)
         whenever(validationContext.configuration)
@@ -55,7 +55,7 @@ class ActiveConfigurationIsDefinedIfStateIsActiveValidatorTest {
     }
 
     @Test
-    fun shouldReturnFalseWhenStateIsActiveAndConfigurationIsMissing() {
+    fun `returns false when state is active and configuration is missing`() {
         whenever(context.getConstraintValidatorPayload(IntegrationValidationContext::class.java))
             .thenReturn(validationContext)
         whenever(validationContext.configuration).thenReturn(null)

@@ -16,7 +16,7 @@ class GlobalExceptionHandlerTest {
     private val handler = GlobalExceptionHandler(ValidationErrorsFormattingService())
 
     @Test
-    fun shouldReturnGenericProblemDetailForForbiddenWithoutBodyException() {
+    fun `returns generic problem detail for forbidden without body exception`() {
         val response = handler.handleResponseStatusException(ForbiddenWithoutBodyException())
 
         assertEquals(403, response.status)
@@ -25,7 +25,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    fun shouldRenderSafeSpecificMessageForResponseStatusExceptions() {
+    fun `renders safe specific message for response status exceptions`() {
         val response =
             handler.handleResponseStatusException(
                 UnprocessableEntityException("Validation errors: ['activeConfigurationId invalid']"),
@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    fun shouldHandleResponseStatusExceptionThrownByDependencies() {
+    fun `handles response status exception thrown by dependencies`() {
         val response =
             handler.handleResponseStatusException(
                 ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission"),
@@ -49,7 +49,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    fun shouldReturnFormattedValidationErrorsForMethodArgumentNotValidException() {
+    fun `returns formatted validation errors for method argument not valid exception`() {
         val target = IntegrationPostDto()
         val bindingResult = BeanPropertyBindingResult(target, "integrationPostDto")
         bindingResult.addError(
@@ -78,7 +78,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    fun shouldHideUnexpectedExceptionDetails() {
+    fun `hides unexpected exception details`() {
         val response = handler.handleUnexpectedException(RuntimeException("boom"))
 
         assertEquals(500, response.status)

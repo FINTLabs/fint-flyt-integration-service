@@ -16,6 +16,7 @@ spring:
       - flyt-logging
       - flyt-postgres
       - flyt-web-resource-server
+      - flyt-authorization-client
   output:
     ansi:
       enabled: always

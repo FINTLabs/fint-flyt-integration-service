@@ -11,7 +11,7 @@ import org.mockito.kotlin.whenever
 
 class ReferencedConfigurationExistsValidatorTest {
     @Test
-    fun shouldValidateReferencedConfigurationExistence() {
+    fun `validates that the referenced configuration exists`() {
         val context = mock<HibernateConstraintValidatorContext>()
         val validationContext = mock<IntegrationValidationContext>()
         val validator = ReferencedConfigurationExistsValidator()
