@@ -10,6 +10,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
+import no.novari.flyt.audit.entity.AuditedEntity
 
 @Entity
 @Table(
@@ -37,7 +38,7 @@ class Integration(
     var state: State? = State.DEACTIVATED,
     @field:Column(name = "active_configuration_id")
     var activeConfigurationId: Long? = null,
-) {
+) : AuditedEntity() {
     enum class State {
         ACTIVE,
         DEACTIVATED,

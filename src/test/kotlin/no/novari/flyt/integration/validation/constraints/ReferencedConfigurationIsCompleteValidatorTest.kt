@@ -21,14 +21,14 @@ class ReferencedConfigurationIsCompleteValidatorTest {
     }
 
     @Test
-    fun shouldReturnTrueForNullValue() {
+    fun `returns true for null value`() {
         val result = validator.isValid(null, createMockContext())
 
         assertTrue(result)
     }
 
     @Test
-    fun shouldReturnTrueWhenConfigurationIsCompleted() {
+    fun `returns true when configuration is completed`() {
         whenever(validationContext.configuration).thenReturn(ConfigurationDto(completed = true))
 
         val result = validator.isValid(1L, createMockContext())
@@ -37,7 +37,7 @@ class ReferencedConfigurationIsCompleteValidatorTest {
     }
 
     @Test
-    fun shouldReturnFalseWhenConfigurationIsNotCompleted() {
+    fun `returns false when configuration is not completed`() {
         whenever(validationContext.configuration).thenReturn(ConfigurationDto(completed = false))
 
         val result = validator.isValid(1L, createMockContext())
