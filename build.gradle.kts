@@ -39,7 +39,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("no.novari:flyt-web-resource-server:3.2.0")
+    implementation("no.novari:flyt-web-resource-server:4.0.0")
     implementation("no.novari:flyt-audit-starter:1.1.0")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 

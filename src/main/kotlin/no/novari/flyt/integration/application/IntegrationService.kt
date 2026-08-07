@@ -13,6 +13,8 @@ class IntegrationService(
     private val integrationRepository: IntegrationRepository,
     private val integrationMappingService: IntegrationMappingService,
 ) {
+    fun findDistinctSourceApplicationIds(): Set<Long> = integrationRepository.findDistinctSourceApplicationIds()
+
     fun findAll(): Collection<IntegrationDto> {
         return integrationMappingService.toDtos(integrationRepository.findAll())
     }
