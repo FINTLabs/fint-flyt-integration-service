@@ -7,7 +7,7 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/instance: fint-flyt-integration-service_bym-oslo-kommune-no
+      app.kubernetes.io/instance: fint-flyt-integration-service_bym_oslo_kommune_no
       fintlabs.no/org-id: bym.oslo.kommune.no
 
 patches:
@@ -30,7 +30,7 @@ patches:
           name: "novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json"
           value: |
             {
-              "bym-oslo-kommune.no":["USER"],
+              "bym.oslo.kommune.no":["USER"],
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
@@ -39,6 +39,11 @@ patches:
         value:
          name: "novari.kafka.topic.orgId"
          value: "bym-oslo-kommune-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "novari.telemetry.org-id"
+         value: "bym.oslo.kommune.no"
       - op: add
         path: "/spec/env/-"
         value:

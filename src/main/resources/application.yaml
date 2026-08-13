@@ -6,6 +6,8 @@ server:
     include-message: always
 
 spring:
+  application:
+    name: ${fint.application-id}
   jpa:
     properties:
       javax.persistence.validation.mode: none
