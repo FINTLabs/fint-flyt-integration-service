@@ -5,6 +5,27 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT/kustomize/templates"
 BASE_TEMPLATE="$TEMPLATE_DIR/overlay.yaml.tpl"
 
+app_instance_suffix() {
+  local namespace="$1"
+  case "$namespace" in
+    bym-oslo-kommune-no)
+      printf '%s' "$namespace"
+      ;;
+    *)
+      printf '%s' "${namespace//-/_}"
+      ;;
+  esac
+}
+
+authorized_org_id() {
+  local namespace="$1"
+  case "$namespace" in
+    *)
+      printf '%s' "${namespace//-/.}"
+      ;;
+  esac
+}
+
 while IFS= read -r file; do
   rel="${file#"$ROOT/kustomize/overlays/"}"
   dir="$(dirname "$rel")"
@@ -16,7 +37,8 @@ while IFS= read -r file; do
   fi
 
   org_id="${namespace//-/.}"
-  app_instance="fint-flyt-integration-service_${namespace//-/_}"
+  role_org_id="$(authorized_org_id "$namespace")"
+  app_instance="fint-flyt-integration-service_$(app_instance_suffix "$namespace")"
   kafka_topic="${namespace}.flyt.*"
 
   path_prefix=""
@@ -33,7 +55,7 @@ while IFS= read -r file; do
 
   role_map_json="$(cat <<EOF
   {
-    "$org_id":["USER"],
+    "$role_org_id":["USER"],
     "vigo.no":["DEVELOPER","USER"],
     "novari.no":["DEVELOPER","USER"]
   }
@@ -44,7 +66,7 @@ EOF
     afk-no|bfk-no|ofk-no)
       role_map_json="$(cat <<EOF
   {
-    "$org_id":["USER"],
+    "$role_org_id":["USER"],
     "viken.no":["USER"],
     "frid-iks.no":["USER"],
     "vigo.no":["DEVELOPER","USER"],
