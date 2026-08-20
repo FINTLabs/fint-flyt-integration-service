@@ -1,4 +1,4 @@
-FROM gradle:9.4.1-jdk25 AS build
+FROM gradle:9.7-jdk25 AS build
 WORKDIR /workspace
 COPY . .
 RUN chmod +x gradlew && ./gradlew --no-daemon bootJar
