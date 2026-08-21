@@ -37,6 +37,11 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
+         name: "novari.telemetry.org-id"
+         value: "$ORG_ID"
+      - op: add
+        path: "/spec/env/-"
+        value:
          name: "server.servlet.context-path"
          value: "$SERVLET_CONTEXT_PATH"
       - op: replace
@@ -50,7 +55,7 @@ patches:
         value: "$LIVENESS_PATH"
       - op: replace
         path: "/spec/observability/metrics/path"
-        value: "$METRICS_PATH"
+        value: "$METRICS_PATH"$OTEL_EXPORTER_OTLP_ENDPOINT_PATCH
 
     target:
       kind: Application
