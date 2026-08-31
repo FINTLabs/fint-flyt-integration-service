@@ -80,6 +80,19 @@ EOF
   role_map_lines="$(printf '%s\n' "$role_map_json" | sed 's/^/          /')"
   ROLE_MAP=$'\n'"$role_map_lines"
 
+  otel_exporter_otlp_endpoint_patch=""
+  if [[ "$env_name" == "beta" ]]; then
+    otel_exporter_otlp_endpoint_patch="$(cat <<EOF
+
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+         value: "http://alloy.flais-system.svc.cluster.local:4318"
+EOF
+)"
+  fi
+
   export NAMESPACE="$namespace"
   export ORG_ID="$org_id"
   export APP_INSTANCE="$app_instance"
@@ -93,6 +106,7 @@ EOF
   export METRICS_PATH="$metrics_path"
   export ROLE_MAP
   export FINT_KAFKA_TOPIC_ORGID="$namespace"
+  export OTEL_EXPORTER_OTLP_ENDPOINT_PATCH="$otel_exporter_otlp_endpoint_patch"
 
   tmp="$(mktemp)"
   envsubst < "$BASE_TEMPLATE" > "$tmp"
