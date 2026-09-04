@@ -9,6 +9,8 @@ import no.novari.flyt.catalog.contract.fixtures.HttpContractFixture
 import no.novari.flyt.catalog.contract.fixtures.HttpContractFixtureRunner
 import no.novari.flyt.integration.api.dto.ConfigurationDto
 import no.novari.flyt.integration.api.dto.IntegrationDto
+import no.novari.flyt.integration.api.dto.IntegrationPatchDto
+import no.novari.flyt.integration.api.dto.IntegrationPostDto
 import no.novari.flyt.integration.application.IntegrationService
 import no.novari.flyt.integration.application.IntegrationUpdateValidationService
 import no.novari.flyt.integration.persistence.entity.Integration
@@ -17,6 +19,7 @@ import no.novari.flyt.integration.validation.IntegrationValidatorFactory
 import no.novari.flyt.integration.validation.ValidationErrorsFormattingService
 import no.novari.flyt.integration.web.GlobalExceptionHandler
 import no.novari.flyt.webresourceserver.security.user.UserAuthorizationService
+import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.validator.HibernateValidator
 import org.hibernate.validator.HibernateValidatorFactory
 import org.junit.jupiter.api.BeforeEach
@@ -24,9 +27,11 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -88,6 +93,42 @@ class IntegrationHttpContractTest {
             objectMapper = OBJECT_MAPPER,
             customizeRequest = { it.principal(authentication) },
         ).verify(fixture)
+
+        verifyDeserializedRequestFor(fixture)
+    }
+
+    /**
+     * Responsen kommer fra stubben, ikke fra det som ble lest inn, så den dekker ikke
+     * request-kontrakten: et felt som forsvinner fra DTO-en ville blitt stille ignorert av Jackson.
+     */
+    private fun verifyDeserializedRequestFor(fixture: HttpContractFixture) {
+        when (fixture.id) {
+            "integration/post/ok" -> {
+                val posted = argumentCaptor<IntegrationPostDto>()
+                verify(integrationService).save(posted.capture())
+
+                assertThat(posted.firstValue).usingRecursiveComparison().isEqualTo(
+                    IntegrationPostDto(
+                        sourceApplicationId = 1L,
+                        sourceApplicationIntegrationId = "kildeapp-integrasjon",
+                        destination = "arkiv",
+                    ),
+                )
+            }
+
+            "integration/patch/ok-activate" -> {
+                val patched = argumentCaptor<IntegrationPatchDto>()
+                verify(integrationService).updateById(eq(1L), patched.capture())
+
+                assertThat(patched.firstValue).usingRecursiveComparison().isEqualTo(
+                    IntegrationPatchDto(state = Integration.State.ACTIVE, activeConfigurationId = 100L),
+                )
+            }
+
+            else -> {
+                Unit
+            }
+        }
     }
 
     private fun stubServiceLayerFor(fixture: HttpContractFixture) {
