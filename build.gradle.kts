@@ -26,6 +26,8 @@ plugins {
 group = "no.novari"
 version = "0.0.1-SNAPSHOT"
 
+var springdocOpenApiVersion = "2.8.17"
+
 kotlin {
     jvmToolchain(25)
 }
@@ -45,11 +47,15 @@ extra["jackson-bom.version"] = "2.22.2"
 extra["log4j2.version"] = "2.26.1"
 extra["postgresql.version"] = "42.7.12"
 extra["tomcat.version"] = "10.1.59"
+extra["commons-lang3.version"] = "3.20.0"
 
 dependencies {
     constraints {
         implementation("at.yawk.lz4:lz4-java:1.11.2") {
             because("Fixes CVE-2026-59949 in the kafka-clients transitive dependency")
+        }
+        implementation("org.apache.commons:commons-lang3:3.20.0") {
+            because("Fixes CVE-2025-48924 in the Spring Boot managed version")
         }
     }
 
@@ -61,6 +67,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenApiVersion")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")

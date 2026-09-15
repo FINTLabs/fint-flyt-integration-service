@@ -1,6 +1,7 @@
 package no.novari.flyt.integration.api.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.GroupSequence
 import no.novari.flyt.audit.actor.Actor
 import no.novari.flyt.integration.persistence.entity.Integration
@@ -17,6 +18,7 @@ import java.time.Instant
     ActiveConfigurationIsForIntegrationGroup::class,
     ActiveConfigurationIsCompleteGroup::class,
 )
+@Schema(description = "A Flyt integration definition.")
 data class IntegrationDto(
     val id: Long,
     val sourceApplicationId: Long,
