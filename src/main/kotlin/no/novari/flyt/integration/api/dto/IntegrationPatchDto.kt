@@ -1,7 +1,9 @@
 package no.novari.flyt.integration.api.dto
 
+import io.swagger.v3.oas.annotations.media.Schema
 import no.novari.flyt.integration.persistence.entity.Integration
 
+@Schema(description = "Fields that can be changed on a Flyt integration.")
 data class IntegrationPatchDto(
     val destination: String? = null,
     val state: Integration.State? = null,

@@ -1,5 +1,10 @@
 package no.novari.flyt.integration.api
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import no.novari.flyt.integration.api.dto.IntegrationDto
 import no.novari.flyt.integration.api.dto.IntegrationPageResponse
@@ -26,14 +31,17 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("$INTERNAL_API/integrasjoner")
+@Tag(name = "Integrations", description = "Management of Flyt integration definitions.")
 class IntegrationController(
     private val integrationService: IntegrationService,
     private val integrationUpdateValidationService: IntegrationUpdateValidationService,
     private val userAuthorizationService: UserAuthorizationService,
 ) {
     @GetMapping
+    @Operation(summary = "List integrations", operationId = "listIntegrations")
     fun listIntegrations(
         authentication: Authentication,
+        @Parameter(description = "Filter by source application identifier")
         @RequestParam(required = false) sourceApplicationId: Long?,
     ): Collection<IntegrationDto> {
         val sourceApplicationIds = resolveAuthorizedSourceApplicationIds(authentication, sourceApplicationId)
@@ -41,12 +49,18 @@ class IntegrationController(
     }
 
     @GetMapping(params = ["side", "antall", "sorteringFelt", "sorteringRetning"])
+    @Operation(summary = "List integrations with pagination", operationId = "listIntegrationsPaginated")
     fun listIntegrationsPaginated(
         authentication: Authentication,
+        @Parameter(description = "Zero-based page number")
         @RequestParam(name = "side") page: Int,
+        @Parameter(description = "Number of integrations per page")
         @RequestParam(name = "antall") size: Int,
+        @Parameter(description = "Property to sort by")
         @RequestParam(name = "sorteringFelt") sortProperty: String,
+        @Parameter(description = "Sort direction")
         @RequestParam(name = "sorteringRetning") sortDirection: Sort.Direction,
+        @Parameter(description = "Filter by source application identifier")
         @RequestParam(required = false) sourceApplicationId: Long?,
     ): IntegrationPageResponse {
         val sourceApplicationIds = resolveAuthorizedSourceApplicationIds(authentication, sourceApplicationId)
@@ -60,8 +74,17 @@ class IntegrationController(
     }
 
     @GetMapping("{integrationId}")
+    @Operation(summary = "Get an integration")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Integration found"),
+            ApiResponse(responseCode = "403", description = "Source application access denied"),
+            ApiResponse(responseCode = "404", description = "Integration not found"),
+        ],
+    )
     fun getIntegrationById(
         authentication: Authentication,
+        @Parameter(description = "Integration identifier")
         @PathVariable integrationId: Long,
     ): IntegrationDto {
         val integration =
@@ -77,6 +100,15 @@ class IntegrationController(
     }
 
     @PostMapping
+    @Operation(summary = "Create an integration")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Integration created"),
+            ApiResponse(responseCode = "403", description = "Source application access denied"),
+            ApiResponse(responseCode = "409", description = "Integration already exists"),
+            ApiResponse(responseCode = "422", description = "Invalid integration"),
+        ],
+    )
     fun createIntegration(
         authentication: Authentication,
         @Valid @RequestBody integrationPostDto: IntegrationPostDto,
@@ -92,8 +124,18 @@ class IntegrationController(
     }
 
     @PatchMapping("{integrationId}")
+    @Operation(summary = "Update an integration")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Integration updated"),
+            ApiResponse(responseCode = "403", description = "Source application access denied"),
+            ApiResponse(responseCode = "404", description = "Integration not found"),
+            ApiResponse(responseCode = "422", description = "Invalid integration"),
+        ],
+    )
     fun updateIntegration(
         authentication: Authentication,
+        @Parameter(description = "Integration identifier")
         @PathVariable integrationId: Long,
         @RequestBody integrationPatchDto: IntegrationPatchDto,
     ): IntegrationDto {

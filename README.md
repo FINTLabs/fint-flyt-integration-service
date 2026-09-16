@@ -47,6 +47,24 @@ Example `IntegrationPostDto` payload:
 
 Validation failures yield `422 Unprocessable Entity` with aggregated error messages. Access to non-authorized source applications returns `403 Forbidden`.
 
+### OpenAPI Documentation
+
+Swagger UI and the generated OpenAPI specification are available only through direct service access, such as a
+Kubernetes port-forward. Their paths sit outside the external ingress route for `/api/intern/integrasjoner`:
+
+- Swagger UI: `/swagger-ui.html`
+- OpenAPI JSON: `/v3/api-docs`
+- OpenAPI YAML: `/v3/api-docs.yaml`
+
+For the FINTLabs beta deployment:
+
+```shell
+kubectl -n fintlabs-no port-forward service/fint-flyt-integration-service 8080:8080
+```
+
+Swagger UI is then available at `http://localhost:8080/beta/fintlabs-no/swagger-ui.html`, and OpenAPI JSON at
+`http://localhost:8080/beta/fintlabs-no/v3/api-docs`.
+
 ## Kafka Integration
 
 - `ConfigurationRequestProducerService` performs request/reply lookups on the `configuration` topic to validate referenced configuration IDs.
