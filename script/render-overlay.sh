@@ -94,7 +94,15 @@ EOF
   export ROLE_MAP
   export FINT_KAFKA_TOPIC_ORGID="$namespace"
 
+  mkdir -p "$(dirname "$file")"
   tmp="$(mktemp)"
   envsubst < "$BASE_TEMPLATE" > "$tmp"
   mv "$tmp" "$file"
-done < <(find "$ROOT/kustomize/overlays" -name kustomization.yaml -print | sort)
+done < <(
+  {
+    find "$ROOT/kustomize/overlays" -name kustomization.yaml -print
+    printf '%s\n' \
+      "$ROOT/kustomize/overlays/ra-no/beta/kustomization.yaml" \
+      "$ROOT/kustomize/overlays/ra-no/api/kustomization.yaml"
+  } | sort -u
+)
