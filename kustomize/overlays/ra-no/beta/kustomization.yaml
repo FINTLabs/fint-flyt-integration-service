@@ -4,6 +4,7 @@ namespace: ra-no
 
 resources:
   - ../../../base
+  - authorization-client-onepassword.yaml
 
 labels:
   - pairs:
@@ -53,6 +54,7 @@ patches:
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/beta/ra-no/actuator/prometheus"
+
 
     target:
       kind: Application
