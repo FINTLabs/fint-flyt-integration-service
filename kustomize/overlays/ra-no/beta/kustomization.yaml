@@ -4,7 +4,6 @@ namespace: ra-no
 
 resources:
   - ../../../base
-  - authorization-client-onepassword.yaml
 
 labels:
   - pairs:
