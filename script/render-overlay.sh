@@ -80,6 +80,20 @@ EOF
   role_map_lines="$(printf '%s\n' "$role_map_json" | sed 's/^/          /')"
   ROLE_MAP=$'\n'"$role_map_lines"
 
+  AUTHORIZATION_SSO_PATCHES=""
+  if [[ "$namespace" == "ra-no" ]]; then
+    AUTHORIZATION_SSO_PATCHES=$'\n'"$(cat <<'EOF'
+      - op: replace
+        path: "/spec/env/1/valueFrom/secretKeyRef/key"
+        value: "fint.flyt.authorization.sso.client-id"
+      - op: replace
+        path: "/spec/env/2/valueFrom/secretKeyRef/key"
+        value: "fint.flyt.authorization.sso.client-secret"
+EOF
+)"
+  fi
+  export AUTHORIZATION_SSO_PATCHES
+
   export NAMESPACE="$namespace"
   export ORG_ID="$org_id"
   export APP_INSTANCE="$app_instance"
