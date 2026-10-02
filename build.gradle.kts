@@ -59,7 +59,6 @@ dependencies {
         }
     }
 
-    implementation(platform("tools.jackson:jackson-bom:3.2.3"))
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -79,7 +78,8 @@ dependencies {
 
     compileOnly("org.springframework.security:spring-security-config")
     compileOnly("org.springframework.security:spring-security-web")
-    runtimeOnly("net.logstash.logback:logstash-logback-encoder:9.0")
+    // Pinned to 8.x: 9.x pulls in Jackson 3 (tools.jackson), while Spring Boot 3.5 uses Jackson 2
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:8.1")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
