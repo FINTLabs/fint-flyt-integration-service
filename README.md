@@ -101,8 +101,7 @@ Secrets referenced by the base manifest must provide database credentials and OA
 Prerequisites:
 
 - Java 25+
-- Dockerized or local PostgreSQL instance
-- Kafka broker (local or containerized)
+- Docker (Docker Compose starts PostgreSQL and Kafka)
 
 Useful commands:
 
@@ -111,7 +110,6 @@ Useful commands:
 ./gradlew test            # unit test suite
 ./gradlew bootRun         # start the application with Flyt profiles
 docker compose up -d      # start PostgreSQL and Kafka locally
-docker compose --profile app up --build # start app, PostgreSQL, and Kafka in containers
 ```
 
 Use `SPRING_PROFILES_ACTIVE=local-staging` to apply the local overrides in `application-local-staging.yaml`. Provide a PostgreSQL instance (defaults to `jdbc:postgresql://localhost:5438/fint-flyt-integration-service`) and a Kafka broker on `localhost:9092`.
@@ -119,9 +117,9 @@ Use `SPRING_PROFILES_ACTIVE=local-staging` to apply the local overrides in `appl
 For local development from IntelliJ or `bootRun`, `docker compose up -d` starts:
 
 - PostgreSQL on `localhost:5438`
-- Apache Kafka `3.8.1` on `localhost:9092`
+- Apache Kafka `3.9.2` on `localhost:9092`
 
-If you also want the application in Docker, use `docker compose --profile app up --build`. Then the app is exposed on `http://localhost:8090`.
+Add `--profile tools` to also start Kafdrop on http://localhost:19000. `docker compose down -v` stops everything and wipes the data.
 
 The compose setup creates the `fintlabs_no` schema automatically so the `local-staging` profile works unchanged. Wait until PostgreSQL is healthy before starting the app locally.
 
