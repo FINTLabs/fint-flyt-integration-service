@@ -119,7 +119,7 @@ For local development from IntelliJ or `bootRun`, `docker compose up -d` starts:
 - PostgreSQL on `localhost:5438`
 - Apache Kafka `3.9.2` on `localhost:9092`
 
-Add `--profile tools` to also start Kafdrop on http://localhost:19000. `docker compose down -v` stops everything and wipes the data.
+Add `--profile tools` to also start Kafdrop on http://localhost:19000. Kafka topics and the database are empty on every start.
 
 The compose setup creates the `fintlabs_no` schema automatically so the `local-staging` profile works unchanged. Wait until PostgreSQL is healthy before starting the app locally.
 
